@@ -1,1 +1,1 @@
-export { isReactive, reactive } from './reactive'
+export { reactive, isReactive, ReactiveFlags } from './reactive'

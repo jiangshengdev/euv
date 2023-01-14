@@ -54,4 +54,56 @@ describe('reactivity/reactive', () => {
     const observed2 = reactive(original)
     expect(observed2).toBe(observed)
   })
+
+  test('non-observable values', () => {
+    const assertValue = (value: any) => {
+      reactive(value)
+      expect(
+        `value cannot be made reactive: ${String(value)}`
+      ).toHaveBeenWarnedLast()
+    }
+
+    // number
+    assertValue(1)
+    // string
+    assertValue('foo')
+    // boolean
+    assertValue(false)
+    // null
+    assertValue(null)
+    // undefined
+    assertValue(undefined)
+    // symbol
+    const s = Symbol()
+    assertValue(s)
+
+    // built-ins should work and return same value
+    const p = Promise.resolve()
+    expect(reactive(p)).toBe(p)
+    const r = new RegExp('')
+    expect(reactive(r)).toBe(r)
+    const d = new Date()
+    expect(reactive(d)).toBe(d)
+  })
+
+  test('should not observe non-extensible objects', () => {
+    const obj = reactive({
+      foo: Object.preventExtensions({ a: 1 }),
+      // sealed or frozen objects are considered non-extensible as well
+      bar: Object.freeze({ a: 1 }),
+      baz: Object.seal({ a: 1 })
+    })
+    expect(isReactive(obj.foo)).toBe(false)
+    expect(isReactive(obj.bar)).toBe(false)
+    expect(isReactive(obj.baz)).toBe(false)
+  })
+
+  test('should not observe objects with __v_skip', () => {
+    const original = {
+      foo: 1,
+      __v_skip: true
+    }
+    const observed = reactive(original)
+    expect(isReactive(observed)).toBe(false)
+  })
 })

@@ -1,15 +1,44 @@
-import { isObject } from '@uv/shared'
+import { isObject, toRawType } from '@uv/shared'
 import { mutableHandlers } from './baseHandlers'
 
 export const enum ReactiveFlags {
+  SKIP = '__v_skip',
   IS_REACTIVE = '__v_isReactive'
 }
 
 export interface Target {
+  [ReactiveFlags.SKIP]?: boolean
   [ReactiveFlags.IS_REACTIVE]?: boolean
 }
 
 export const reactiveMap = new WeakMap<Target, any>()
+
+const enum TargetType {
+  INVALID = 0,
+  COMMON = 1,
+  COLLECTION = 2
+}
+
+function targetTypeMap(rawType: string) {
+  switch (rawType) {
+    case 'Object':
+    case 'Array':
+      return TargetType.COMMON
+    case 'Map':
+    case 'Set':
+    case 'WeakMap':
+    case 'WeakSet':
+      return TargetType.COLLECTION
+    default:
+      return TargetType.INVALID
+  }
+}
+
+function getTargetType(value: Target) {
+  return value[ReactiveFlags.SKIP] || !Object.isExtensible(value)
+    ? TargetType.INVALID
+    : targetTypeMap(toRawType(value))
+}
 
 /**
  * Creates a reactive copy of the original object.
@@ -35,20 +64,25 @@ export const reactiveMap = new WeakMap<Target, any>()
  */
 export function reactive(target: object) {
   if (!isObject(target)) {
+    if (__DEV__) {
+      console.warn(`value cannot be made reactive: ${String(target)}`)
+    }
     return target
   }
-
   // target is already a Proxy, return it.
   if (target[ReactiveFlags.IS_REACTIVE]) {
     return target
   }
-
   // target already has corresponding Proxy
   const existingProxy = reactiveMap.get(target)
   if (existingProxy) {
     return existingProxy
   }
-
+  // only specific value types can be observed.
+  const targetType = getTargetType(target)
+  if (targetType === TargetType.INVALID) {
+    return target
+  }
   const proxy = new Proxy(target, mutableHandlers)
   reactiveMap.set(target, proxy)
   return proxy
