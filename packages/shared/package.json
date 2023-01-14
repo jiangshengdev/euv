@@ -1,0 +1,12 @@
+{
+  "name": "@uv/shared",
+  "version": "1.0.0",
+  "main": "index.js",
+  "sideEffects": false,
+  "buildOptions": {
+    "formats": [
+      "esm-bundler",
+      "cjs"
+    ]
+  }
+}
