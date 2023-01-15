@@ -1,6 +1,7 @@
 {
   "name": "@euv/shared",
   "version": "1.0.0",
+  "description": "internal utils shared across @euv packages",
   "main": "index.js",
   "sideEffects": false,
   "buildOptions": {

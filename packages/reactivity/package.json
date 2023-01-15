@@ -1,10 +1,11 @@
 {
   "name": "@euv/reactivity",
   "version": "1.0.0",
+  "description": "@euv/reactivity",
   "main": "index.js",
   "sideEffects": false,
   "buildOptions": {
-    "name": "VueReactivity",
+    "name": "EuvReactivity",
     "formats": [
       "esm-bundler",
       "esm-browser",

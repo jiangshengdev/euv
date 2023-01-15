@@ -2,7 +2,7 @@
   "name": "euv",
   "version": "1.0.0",
   "scripts": {
-    "dev": "node scripts/dev.js -f esm",
+    "dev-esm": "node scripts/dev.js -if esm-bundler-runtime",
     "lint": "eslint --cache --ext .ts packages/*/{src,__tests__}/**.ts",
     "format": "prettier --write --cache --parser typescript \"**/*.[tj]s?(x)\""
   },
