@@ -27,7 +27,7 @@ const postfix = format.endsWith('-runtime')
 const outfile = resolve(
   __dirname,
   `../packages/${target}/dist/${
-    target === 'uv-compat' ? `uv` : target
+    target === 'euv-compat' ? `euv` : target
   }.${postfix}.js`
 )
 const relativeOutfile = relative(process.cwd(), outfile)
@@ -42,7 +42,7 @@ if (!inlineDeps) {
       ...external,
       ...Object.keys(pkg.dependencies || {}),
       ...Object.keys(pkg.peerDependencies || {}),
-      // for @uv/compiler-sfc / server-renderer
+      // for @euv/compiler-sfc / server-renderer
       'path',
       'url',
       'stream'
@@ -50,7 +50,7 @@ if (!inlineDeps) {
   }
 
   if (target === 'compiler-sfc') {
-    const consolidateDeps = require.resolve('@uv/consolidate/package.json', {
+    const consolidateDeps = require.resolve('@euv/consolidate/package.json', {
       paths: [resolve(__dirname, `../packages/${target}/`)]
     })
     external = [
@@ -94,7 +94,7 @@ build({
     __ESM_BROWSER__: String(format.includes('esm-browser')),
     __NODE_JS__: String(format === 'cjs'),
     __SSR__: String(format === 'cjs' || format.includes('esm-bundler')),
-    __COMPAT__: String(target === 'uv-compat'),
+    __COMPAT__: String(target === 'euv-compat'),
     __FEATURE_SUSPENSE__: `true`,
     __FEATURE_OPTIONS_API__: `true`,
     __FEATURE_PROD_DEVTOOLS__: `false`

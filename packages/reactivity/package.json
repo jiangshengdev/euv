@@ -1,5 +1,5 @@
 {
-  "name": "@uv/reactivity",
+  "name": "@euv/reactivity",
   "version": "1.0.0",
   "main": "index.js",
   "sideEffects": false,
@@ -13,6 +13,6 @@
     ]
   },
   "dependencies": {
-    "@uv/shared": "workspace:*"
+    "@euv/shared": "workspace:*"
   }
 }

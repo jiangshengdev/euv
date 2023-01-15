@@ -41,21 +41,21 @@ module.exports = {
     // DOM transitions are tested via e2e so no coverage is collected
     '!packages/runtime-dom/src/components/Transition*',
     // only called in browsers
-    '!packages/uv/src/devCheck.ts',
+    '!packages/euv/src/devCheck.ts',
     // only used as a build entry
-    '!packages/uv/src/runtime.ts',
+    '!packages/euv/src/runtime.ts',
     // mostly just entries
-    '!packages/uv-compat/**'
+    '!packages/euv-compat/**'
   ],
   watchPathIgnorePatterns: ['/node_modules/', '/dist/', '/.git/'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'json'],
   moduleNameMapper: {
-    '@uv/consolidate': '@uv/consolidate',
-    '@uv/compat': '<rootDir>/packages/uv-compat/src',
-    '^@uv/(.*?)$': '<rootDir>/packages/$1/src',
-    'uv/compiler-sfc': '<rootDir>/packages/compiler-sfc/src',
-    'uv/server-renderer': '<rootDir>/packages/server-renderer/src',
-    uv: '<rootDir>/packages/uv/src'
+    '@euv/consolidate': '@euv/consolidate',
+    '@euv/compat': '<rootDir>/packages/euv-compat/src',
+    '^@euv/(.*?)$': '<rootDir>/packages/$1/src',
+    'euv/compiler-sfc': '<rootDir>/packages/compiler-sfc/src',
+    'euv/server-renderer': '<rootDir>/packages/server-renderer/src',
+    euv: '<rootDir>/packages/euv/src'
   },
   rootDir: __dirname,
   testMatch: ['<rootDir>/packages/**/__tests__/**/*spec.[jt]s?(x)'],

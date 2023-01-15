@@ -20,9 +20,9 @@
     "types": ["jest", "puppeteer", "node"],
     "rootDir": ".",
     "paths": {
-      "@uv/compat": ["packages/uv-compat/src"],
-      "@uv/*": ["packages/*/src"],
-      "uv": ["packages/uv/src"]
+      "@euv/compat": ["packages/euv-compat/src"],
+      "@euv/*": ["packages/*/src"],
+      "euv": ["packages/euv/src"]
     }
   },
   "include": [

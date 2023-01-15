@@ -47,7 +47,7 @@ module.exports = {
     },
     // Packages targeting DOM
     {
-      files: ['packages/{uv,uv-compat,runtime-dom}/**'],
+      files: ['packages/{euv,euv-compat,runtime-dom}/**'],
       rules: {
         'no-restricted-globals': ['error', ...NodeGlobals]
       }

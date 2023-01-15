@@ -36,9 +36,9 @@ importers:
 
   packages/reactivity:
     specifiers:
-      '@uv/shared': workspace:*
+      '@euv/shared': workspace:*
     dependencies:
-      '@uv/shared': link:../shared
+      '@euv/shared': link:../shared
 
   packages/shared:
     specifiers: {}

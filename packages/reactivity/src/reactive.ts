@@ -1,4 +1,4 @@
-import { isObject, toRawType } from '@uv/shared'
+import { isObject, toRawType } from '@euv/shared'
 import { mutableHandlers } from './baseHandlers'
 
 export const enum ReactiveFlags {
