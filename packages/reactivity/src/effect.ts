@@ -85,9 +85,9 @@ export function trigger(
     return
   }
 
-  dep.forEach(effect => {
+  for (const effect of dep) {
     if (effect !== activeEffect) {
       effect.run()
     }
-  })
+  }
 }
