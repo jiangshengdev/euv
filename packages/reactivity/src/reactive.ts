@@ -35,9 +35,17 @@ function targetTypeMap(rawType: string) {
 }
 
 function getTargetType(value: Target) {
-  return value[ReactiveFlags.SKIP] || !Object.isExtensible(value)
-    ? TargetType.INVALID
-    : targetTypeMap(toRawType(value))
+  let skip = value[ReactiveFlags.SKIP]
+  let notExtensible = !Object.isExtensible(value)
+
+  if (skip || notExtensible) {
+    return TargetType.INVALID
+  } else {
+    let rawType = toRawType(value)
+    let targetType = targetTypeMap(rawType)
+
+    return targetType
+  }
 }
 
 /**
@@ -67,27 +75,35 @@ export function reactive(target: object) {
     if (__DEV__) {
       console.warn(`value cannot be made reactive: ${String(target)}`)
     }
+
     return target
   }
+
   // target is already a Proxy, return it.
   if (target[ReactiveFlags.IS_REACTIVE]) {
     return target
   }
+
   // target already has corresponding Proxy
   const existingProxy = reactiveMap.get(target)
   if (existingProxy) {
     return existingProxy
   }
+
   // only specific value types can be observed.
   const targetType = getTargetType(target)
   if (targetType === TargetType.INVALID) {
     return target
   }
+
   const proxy = new Proxy(target, mutableHandlers)
   reactiveMap.set(target, proxy)
+
   return proxy
 }
 
 export function isReactive(value: unknown): boolean {
-  return !!(value && (value as Target)[ReactiveFlags.IS_REACTIVE])
+  let ret = !!(value && (value as Target)[ReactiveFlags.IS_REACTIVE])
+
+  return ret
 }

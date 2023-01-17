@@ -1,4 +1,4 @@
-import { createDep, Dep } from './dep'
+import { Dep } from './dep'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
 
 // The main WeakMap that stores {target -> key -> dep} connections.
@@ -19,12 +19,17 @@ export class ReactiveEffect<T = any> {
 
   run() {
     if (!this.active) {
-      return this.fn()
+      let result = this.fn()
+
+      return result
     }
+
     try {
       this.parent = activeEffect
       activeEffect = this
-      return this.fn()
+      let result = this.fn()
+
+      return result
     } finally {
       activeEffect = this.parent
       this.parent = undefined
@@ -48,22 +53,29 @@ export function effect<T = any>(fn: () => T) {
 }
 
 export function track(target: object, type: TrackOpTypes, key: unknown) {
-  if (activeEffect) {
-    let depsMap = targetMap.get(target)
-    if (!depsMap) {
-      targetMap.set(target, (depsMap = new Map()))
-    }
-    let dep = depsMap.get(key)
-    if (!dep) {
-      depsMap.set(key, (dep = createDep()))
-    }
-
-    let shouldTrack = !dep.has(activeEffect!)
-    if (shouldTrack) {
-      dep.add(activeEffect!)
-      activeEffect!.deps.push(dep)
-    }
+  if (!activeEffect) {
+    return
   }
+
+  let depsMap = targetMap.get(target)
+  if (!depsMap) {
+    depsMap = new Map()
+    targetMap.set(target, depsMap)
+  }
+
+  let dep = depsMap.get(key)
+  if (!dep) {
+    dep = new Set()
+    depsMap.set(key, dep)
+  }
+
+  let shouldTrack = !dep.has(activeEffect!)
+  if (!shouldTrack) {
+    return
+  }
+
+  dep.add(activeEffect!)
+  activeEffect!.deps.push(dep)
 }
 
 export function trigger(

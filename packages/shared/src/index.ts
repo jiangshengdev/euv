@@ -1,14 +1,22 @@
 export function isObject(val: unknown): val is Record<any, any> {
-  return val !== null && typeof val === 'object'
+  let notNull = val !== null
+  let typeIsObject = typeof val === 'object'
+  let isObject = notNull && typeIsObject
+
+  return isObject
 }
 
 export const objectToString = Object.prototype.toString
 
 export function toTypeString(value: unknown): string {
-  return objectToString.call(value)
+  let type = objectToString.call(value)
+
+  return type
 }
 
 export function toRawType(value: unknown): string {
   // extract "RawType" from strings like "[object RawType]"
-  return toTypeString(value).slice(8, -1)
+  let rawType = toTypeString(value).slice(8, -1)
+
+  return rawType
 }
