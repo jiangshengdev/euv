@@ -20,7 +20,6 @@ export const mutableHandlers: ProxyHandler<object> = {
     receiver: object
   ): boolean {
     let oldValue = (target as any)[key]
-
     const result = Reflect.set(target, key, value, receiver)
     trigger(target, TriggerOpTypes.SET, key, value, oldValue)
 

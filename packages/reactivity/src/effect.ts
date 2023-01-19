@@ -1,5 +1,6 @@
-import { Dep } from './dep'
+import { createDep, Dep } from './dep'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
+import { extend } from '@euv/shared'
 
 // The main WeakMap that stores {target -> key -> dep} connections.
 // Conceptually, it's easier to think of a dependency as a Dep class
@@ -8,6 +9,8 @@ import { TrackOpTypes, TriggerOpTypes } from './operations'
 type KeyToDepMap = Map<any, Dep>
 const targetMap = new WeakMap<any, KeyToDepMap>()
 
+export type EffectScheduler = (...args: any[]) => any
+
 export let activeEffect: ReactiveEffect | undefined
 
 export class ReactiveEffect<T = any> {
@@ -15,7 +18,10 @@ export class ReactiveEffect<T = any> {
   deps: Dep[] = []
   parent: ReactiveEffect | undefined = undefined
 
-  constructor(public fn: () => T) {}
+  constructor(
+    public fn: () => T,
+    public scheduler: EffectScheduler | null = null
+  ) {}
 
   run() {
     if (!this.active) {
@@ -27,6 +33,7 @@ export class ReactiveEffect<T = any> {
     try {
       this.parent = activeEffect
       activeEffect = this
+      cleanupEffect(this)
       let result = this.fn()
 
       return result
@@ -35,6 +42,33 @@ export class ReactiveEffect<T = any> {
       this.parent = undefined
     }
   }
+
+  stop() {
+    if (this.active) {
+      cleanupEffect(this)
+      this.active = false
+    }
+  }
+}
+
+function cleanupEffect(effect: ReactiveEffect) {
+  const { deps } = effect
+
+  if (!deps.length) {
+    return
+  }
+
+  for (const dep of deps) {
+    dep.delete(effect)
+  }
+  deps.length = 0
+}
+
+export interface ReactiveEffectOptions {
+  lazy?: boolean
+  scheduler?: EffectScheduler
+  allowRecurse?: boolean
+  onStop?: () => void
 }
 
 export interface ReactiveEffectRunner<T = any> {
@@ -43,13 +77,23 @@ export interface ReactiveEffectRunner<T = any> {
   (): T
 }
 
-export function effect<T = any>(fn: () => T) {
+export function effect<T = any>(
+  fn: () => T,
+  options?: ReactiveEffectOptions
+): ReactiveEffectRunner {
   const _effect = new ReactiveEffect(fn)
+  if (options) {
+    extend(_effect, options)
+  }
   _effect.run()
 
   const runner = _effect.run.bind(_effect) as ReactiveEffectRunner
   runner.effect = _effect
   return runner
+}
+
+export function stop(runner: ReactiveEffectRunner) {
+  runner.effect.stop()
 }
 
 export function track(target: object, type: TrackOpTypes, key: unknown) {
@@ -65,7 +109,7 @@ export function track(target: object, type: TrackOpTypes, key: unknown) {
 
   let dep = depsMap.get(key)
   if (!dep) {
-    dep = new Set()
+    dep = createDep()
     depsMap.set(key, dep)
   }
 
@@ -92,14 +136,23 @@ export function trigger(
     return
   }
 
-  const dep = depsMap.get(key)
-  if (!dep) {
-    return
+  let deps: (Dep | undefined)[] = []
+  deps.push(depsMap.get(key))
+
+  const effects: ReactiveEffect[] = []
+  for (const dep of deps) {
+    if (dep) {
+      effects.push(...dep)
+    }
   }
 
-  for (const effect of dep) {
+  for (const effect of effects) {
     if (effect !== activeEffect) {
-      effect.run()
+      if (effect.scheduler) {
+        effect.scheduler()
+      } else {
+        effect.run()
+      }
     }
   }
 }

@@ -1,4 +1,4 @@
-import { effect, reactive } from '@euv/reactivity'
+import { effect, reactive, stop } from '../src/index'
 
 describe('reactivity/effect', () => {
   it('should run the passed function once (wrapped by a effect)', () => {
@@ -15,6 +15,16 @@ describe('reactivity/effect', () => {
     expect(dummy).toBe(0)
     counter.num = 7
     expect(dummy).toBe(7)
+  })
+
+  it('should observe multiple properties', () => {
+    let dummy
+    const counter = reactive({ num1: 0, num2: 0 })
+    effect(() => (dummy = counter.num1 + counter.num1 + counter.num2))
+
+    expect(dummy).toBe(0)
+    counter.num1 = counter.num2 = 7
+    expect(dummy).toBe(21)
   })
 
   it('should handle multiple effects', () => {
@@ -73,5 +83,48 @@ describe('reactivity/effect', () => {
     expect(dummy).toEqual({ num1: 4, num2: 10, num3: 7 })
     expect(parentSpy).toHaveBeenCalledTimes(3)
     expect(childSpy).toHaveBeenCalledTimes(5)
+  })
+
+  it('scheduler', () => {
+    let dummy
+    let run: any
+    const scheduler = jest.fn(() => {
+      run = runner
+    })
+    const obj = reactive({ foo: 1 })
+    const runner = effect(
+      () => {
+        dummy = obj.foo
+      },
+      { scheduler }
+    )
+    expect(scheduler).not.toHaveBeenCalled()
+    expect(dummy).toBe(1)
+    // should be called on first trigger
+    obj.foo++
+    expect(scheduler).toHaveBeenCalledTimes(1)
+    // should not run yet
+    expect(dummy).toBe(1)
+    // manually run
+    run()
+    // should have run
+    expect(dummy).toBe(2)
+  })
+
+  it('stop', () => {
+    let dummy
+    const obj = reactive({ prop: 1 })
+    const runner = effect(() => {
+      dummy = obj.prop
+    })
+    obj.prop = 2
+    expect(dummy).toBe(2)
+    stop(runner)
+    obj.prop = 3
+    expect(dummy).toBe(2)
+
+    // stopped effect should still be manually callable
+    runner()
+    expect(dummy).toBe(3)
   })
 })

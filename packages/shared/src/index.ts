@@ -1,9 +1,11 @@
+export const extend = Object.assign
+
 export function isObject(val: unknown): val is Record<any, any> {
   let notNull = val !== null
   let typeIsObject = typeof val === 'object'
-  let isObject = notNull && typeIsObject
+  let is = notNull && typeIsObject
 
-  return isObject
+  return is
 }
 
 export const objectToString = Object.prototype.toString
