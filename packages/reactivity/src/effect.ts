@@ -61,14 +61,13 @@ function cleanupEffect(effect: ReactiveEffect) {
   for (const dep of deps) {
     dep.delete(effect)
   }
+
   deps.length = 0
 }
 
 export interface ReactiveEffectOptions {
   lazy?: boolean
   scheduler?: EffectScheduler
-  allowRecurse?: boolean
-  onStop?: () => void
 }
 
 export interface ReactiveEffectRunner<T = any> {

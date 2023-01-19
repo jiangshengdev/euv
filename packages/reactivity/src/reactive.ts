@@ -103,7 +103,7 @@ export function reactive(target: object) {
 }
 
 export function isReactive(value: unknown): boolean {
-  let ret = !!(value && (value as Target)[ReactiveFlags.IS_REACTIVE])
+  let is = !!(value && (value as Target)[ReactiveFlags.IS_REACTIVE])
 
-  return ret
+  return is
 }
