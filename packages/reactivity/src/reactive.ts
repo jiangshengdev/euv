@@ -1,6 +1,7 @@
 import { isObject, toRawType } from '@euv/shared'
 import { mutableHandlers } from './baseHandlers'
 import { mutableCollectionHandlers } from './collectionHandlers'
+import { Ref, UnwrapRefSimple } from './ref'
 
 export const enum ReactiveFlags {
   SKIP = '__v_skip',
@@ -49,6 +50,9 @@ function getTargetType(value: Target) {
   }
 }
 
+// only unwrap nested ref
+export type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRefSimple<T>
+
 /**
  * Creates a reactive copy of the original object.
  *
@@ -71,6 +75,7 @@ function getTargetType(value: Target) {
  * count.value // -> 1
  * ```
  */
+export function reactive<T extends object>(target: T): UnwrapNestedRefs<T>
 export function reactive(target: object) {
   return createReactiveObject(
     target,
@@ -80,6 +85,8 @@ export function reactive(target: object) {
     reactiveMap
   )
 }
+
+export declare const ShallowReactiveMarker: unique symbol
 
 function createReactiveObject(
   target: Target,

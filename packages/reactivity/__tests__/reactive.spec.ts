@@ -15,6 +15,19 @@ describe('reactivity/reactive', () => {
     expect(Object.keys(observed)).toEqual(['foo'])
   })
 
+  test('nested reactives', () => {
+    const original = {
+      nested: {
+        foo: 1
+      },
+      array: [{ bar: 2 }]
+    }
+    const observed = reactive(original)
+    expect(isReactive(observed.nested)).toBe(true)
+    expect(isReactive(observed.array)).toBe(true)
+    expect(isReactive(observed.array[0])).toBe(true)
+  })
+
   test('observed value should proxy mutations to original (Object)', () => {
     const original: any = { foo: 1 }
     const observed = reactive(original)
@@ -39,6 +52,14 @@ describe('reactivity/reactive', () => {
     delete original.foo
     expect('foo' in original).toBe(false)
     expect('foo' in observed).toBe(false)
+  })
+
+  test('setting a property with an unobserved value should wrap with reactive', () => {
+    const observed = reactive<{ foo?: object }>({})
+    const raw = {}
+    observed.foo = raw
+    expect(observed.foo).not.toBe(raw)
+    expect(isReactive(observed.foo)).toBe(true)
   })
 
   test('observing already observed value should return same Proxy', () => {
