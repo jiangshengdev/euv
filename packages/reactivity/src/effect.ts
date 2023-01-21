@@ -1,6 +1,6 @@
 import { createDep, Dep } from './dep'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
-import { extend } from '@euv/shared'
+import { extend, isArray } from '@euv/shared'
 
 // The main WeakMap that stores {target -> key -> dep} connections.
 // Conceptually, it's easier to think of a dependency as a Dep class
@@ -33,6 +33,7 @@ export class ReactiveEffect<T = any> {
     try {
       this.parent = activeEffect
       activeEffect = this
+
       cleanupEffect(this)
       let result = this.fn()
 
@@ -112,6 +113,10 @@ export function track(target: object, type: TrackOpTypes, key: unknown) {
     depsMap.set(key, dep)
   }
 
+  trackEffects(dep)
+}
+
+export function trackEffects(dep: Dep) {
   let shouldTrack = !dep.has(activeEffect!)
   if (!shouldTrack) {
     return
@@ -145,13 +150,23 @@ export function trigger(
     }
   }
 
+  triggerEffects(createDep(effects))
+}
+
+export function triggerEffects(dep: Dep | ReactiveEffect[]) {
+  // spread into array for stabilization
+  const effects = isArray(dep) ? dep : [...dep]
   for (const effect of effects) {
-    if (effect !== activeEffect) {
-      if (effect.scheduler) {
-        effect.scheduler()
-      } else {
-        effect.run()
-      }
+    triggerEffect(effect)
+  }
+}
+
+function triggerEffect(effect: ReactiveEffect) {
+  if (effect !== activeEffect) {
+    if (effect.scheduler) {
+      effect.scheduler()
+    } else {
+      effect.run()
     }
   }
 }

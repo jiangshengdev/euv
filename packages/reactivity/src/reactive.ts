@@ -1,5 +1,6 @@
 import { isObject, toRawType } from '@euv/shared'
 import { mutableHandlers } from './baseHandlers'
+import { mutableCollectionHandlers } from './collectionHandlers'
 
 export const enum ReactiveFlags {
   SKIP = '__v_skip',
@@ -71,6 +72,22 @@ function getTargetType(value: Target) {
  * ```
  */
 export function reactive(target: object) {
+  return createReactiveObject(
+    target,
+    false,
+    mutableHandlers,
+    mutableCollectionHandlers,
+    reactiveMap
+  )
+}
+
+function createReactiveObject(
+  target: Target,
+  isReadonly: boolean,
+  baseHandlers: ProxyHandler<any>,
+  collectionHandlers: ProxyHandler<any>,
+  proxyMap: WeakMap<Target, any>
+) {
   if (!isObject(target)) {
     if (__DEV__) {
       console.warn(`value cannot be made reactive: ${String(target)}`)
@@ -85,7 +102,7 @@ export function reactive(target: object) {
   }
 
   // target already has corresponding Proxy
-  const existingProxy = reactiveMap.get(target)
+  const existingProxy = proxyMap.get(target)
   if (existingProxy) {
     return existingProxy
   }
@@ -96,8 +113,11 @@ export function reactive(target: object) {
     return target
   }
 
-  const proxy = new Proxy(target, mutableHandlers)
-  reactiveMap.set(target, proxy)
+  const proxy = new Proxy(
+    target,
+    targetType === TargetType.COLLECTION ? collectionHandlers : baseHandlers
+  )
+  proxyMap.set(target, proxy)
 
   return proxy
 }

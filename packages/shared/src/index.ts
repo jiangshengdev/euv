@@ -1,5 +1,7 @@
 export const extend = Object.assign
 
+export const isArray = Array.isArray
+
 export function isObject(val: unknown): val is Record<any, any> {
   let notNull = val !== null
   let typeIsObject = typeof val === 'object'
@@ -21,4 +23,11 @@ export function toRawType(value: unknown): string {
   let rawType = toTypeString(value).slice(8, -1)
 
   return rawType
+}
+
+// compare whether a value has changed, accounting for NaN.
+export function hasChanged(value: any, oldValue: any): boolean {
+  let same = Object.is(value, oldValue)
+
+  return !same
 }
