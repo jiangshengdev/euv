@@ -2,8 +2,8 @@
   "name": "euv",
   "version": "1.0.0",
   "scripts": {
-    "dev-esm": "node scripts/dev.js -if esm-bundler-runtime",
     "lint": "eslint --cache --ext .ts packages/*/{src,__tests__}/**.ts",
+    "dev-esm": "node scripts/dev.js -if esm-bundler-runtime",
     "format": "prettier --write --cache --parser typescript \"**/*.[tj]s?(x)\""
   },
   "license": "MIT",

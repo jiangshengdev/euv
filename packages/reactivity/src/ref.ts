@@ -1,5 +1,5 @@
+import type { ShallowReactiveMarker } from './reactive'
 import { CollectionTypes } from './collectionHandlers'
-import { ShallowReactiveMarker } from './reactive'
 
 declare const RefSymbol: unique symbol
 export declare const RawSymbol: unique symbol
@@ -13,6 +13,15 @@ export interface Ref<T = any> {
    */
   [RefSymbol]: true
 }
+
+declare const ShallowRefMarker: unique symbol
+
+export type ShallowRef<T = any> = Ref<T> & { [ShallowRefMarker]?: true }
+
+// corner case when use narrows type
+// Ex. type RelativePath = string & { __brand: unknown }
+// RelativePath extends object -> true
+type BaseTypes = string | number | boolean
 
 /**
  * This is a special exported interface for other packages to declare
@@ -32,15 +41,6 @@ export interface Ref<T = any> {
  * to the final generated d.ts in our build process.
  */
 export interface RefUnwrapBailTypes {}
-
-// corner case when use narrows type
-// Ex. type RelativePath = string & { __brand: unknown }
-// RelativePath extends object -> true
-type BaseTypes = string | number | boolean
-
-declare const ShallowRefMarker: unique symbol
-
-export type ShallowRef<T = any> = Ref<T> & { [ShallowRefMarker]?: true }
 
 export type UnwrapRef<T> = T extends ShallowRef<infer V>
   ? V

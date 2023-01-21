@@ -40,6 +40,16 @@ describe('reactivity/effect', () => {
     expect(dummy2).toBe(1)
   })
 
+  it('should observe nested properties', () => {
+    let dummy
+    const counter = reactive({ nested: { num: 0 } })
+    effect(() => (dummy = counter.nested.num))
+
+    expect(dummy).toBe(0)
+    counter.nested.num = 8
+    expect(dummy).toBe(8)
+  })
+
   it('should avoid implicit infinite recursive loops with itself', () => {
     const counter = reactive({ num: 0 })
 
@@ -126,5 +136,15 @@ describe('reactivity/effect', () => {
     // stopped effect should still be manually callable
     runner()
     expect(dummy).toBe(3)
+  })
+
+  it('should not be triggered when the value and the old value both are NaN', () => {
+    const obj = reactive({
+      foo: NaN
+    })
+    const fnSpy = jest.fn(() => obj.foo)
+    effect(fnSpy)
+    obj.foo = NaN
+    expect(fnSpy).toHaveBeenCalledTimes(1)
   })
 })

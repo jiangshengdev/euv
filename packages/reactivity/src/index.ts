@@ -1,4 +1,10 @@
-export { reactive, isReactive, ReactiveFlags } from './reactive'
+export { Ref, UnwrapRef, ShallowRef, RefUnwrapBailTypes } from './ref'
+export {
+  reactive,
+  isReactive,
+  ReactiveFlags,
+  UnwrapNestedRefs
+} from './reactive'
 export {
   effect,
   stop,

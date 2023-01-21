@@ -1,7 +1,7 @@
 import { isObject, toRawType } from '@euv/shared'
 import { mutableHandlers } from './baseHandlers'
 import { mutableCollectionHandlers } from './collectionHandlers'
-import { Ref, UnwrapRefSimple } from './ref'
+import type { Ref, UnwrapRefSimple } from './ref'
 
 export const enum ReactiveFlags {
   SKIP = '__v_skip',

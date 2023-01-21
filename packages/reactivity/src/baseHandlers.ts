@@ -12,6 +12,7 @@ function createGetter() {
     }
 
     const res = Reflect.get(target, key, receiver)
+
     track(target, TrackOpTypes.GET, key)
 
     if (isObject(res)) {
@@ -27,7 +28,7 @@ function createGetter() {
 
 const set = /*#__PURE__*/ createSetter()
 
-function createSetter(shallow = false) {
+function createSetter() {
   return function set(
     target: object,
     key: string | symbol,
@@ -35,6 +36,7 @@ function createSetter(shallow = false) {
     receiver: object
   ): boolean {
     let oldValue = (target as any)[key]
+
     const result = Reflect.set(target, key, value, receiver)
 
     if (hasChanged(value, oldValue)) {

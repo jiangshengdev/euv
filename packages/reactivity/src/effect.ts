@@ -1,6 +1,6 @@
-import { createDep, Dep } from './dep'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
 import { extend, isArray } from '@euv/shared'
+import { createDep, Dep } from './dep'
 
 // The main WeakMap that stores {target -> key -> dep} connections.
 // Conceptually, it's easier to think of a dependency as a Dep class
@@ -118,6 +118,7 @@ export function track(target: object, type: TrackOpTypes, key: unknown) {
 
 export function trackEffects(dep: Dep) {
   let shouldTrack = !dep.has(activeEffect!)
+
   if (!shouldTrack) {
     return
   }
@@ -141,6 +142,7 @@ export function trigger(
   }
 
   let deps: (Dep | undefined)[] = []
+
   deps.push(depsMap.get(key))
 
   const effects: ReactiveEffect[] = []
