@@ -1,6 +1,11 @@
+export const NOOP = () => {}
+
 export const extend = Object.assign
 
 export const isArray = Array.isArray
+
+export const isFunction = (val: unknown): val is Function =>
+  typeof val === 'function'
 
 export function isObject(val: unknown): val is Record<any, any> {
   let notNull = val !== null

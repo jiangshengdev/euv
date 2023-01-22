@@ -1,5 +1,7 @@
+import { activeEffect, trackEffects, triggerEffects } from './effect'
 import type { ShallowReactiveMarker } from './reactive'
 import { CollectionTypes } from './collectionHandlers'
+import { createDep, Dep } from './dep'
 
 declare const RefSymbol: unique symbol
 export declare const RawSymbol: unique symbol
@@ -12,6 +14,23 @@ export interface Ref<T = any> {
    * autocomplete, so we use a private Symbol instead.
    */
   [RefSymbol]: true
+}
+
+type RefBase<T> = {
+  dep?: Dep
+  value: T
+}
+
+export function trackRefValue(ref: RefBase<any>) {
+  if (activeEffect) {
+    trackEffects(ref.dep || (ref.dep = createDep()))
+  }
+}
+
+export function triggerRefValue(ref: RefBase<any>, newVal?: any) {
+  if (ref.dep) {
+    triggerEffects(ref.dep)
+  }
 }
 
 declare const ShallowRefMarker: unique symbol
