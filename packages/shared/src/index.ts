@@ -4,8 +4,11 @@ export const extend = Object.assign
 
 export const isArray = Array.isArray
 
-export const isFunction = (val: unknown): val is Function =>
-  typeof val === 'function'
+export function isFunction(val: unknown): val is Function {
+  let is = typeof val === 'function'
+
+  return is
+}
 
 export function isObject(val: unknown): val is Record<any, any> {
   let notNull = val !== null

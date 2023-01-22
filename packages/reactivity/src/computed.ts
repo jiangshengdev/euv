@@ -24,12 +24,8 @@ export interface WritableComputedOptions<T> {
 
 export class ComputedRefImpl<T> {
   public dep?: Dep = undefined
-
-  private _value!: T
   public readonly effect: ReactiveEffect<T>
-
   public readonly __v_isRef = true
-
   public _dirty = true
 
   constructor(
@@ -43,6 +39,8 @@ export class ComputedRefImpl<T> {
       }
     })
   }
+
+  private _value!: T
 
   get value() {
     trackRefValue(this)
