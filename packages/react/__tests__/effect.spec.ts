@@ -1,15 +1,33 @@
-import { effect } from '@euv/react'
+import { effect, reactive } from '@euv/react'
 
 describe('react/effect', () => {
   it('should run the passed function once (wrapped by a effect)', () => {
-    let count = 0
+    let counter = 0
 
     const fn = function fn() {
-      count++
+      counter++
     }
 
     effect(fn)
 
-    console.assert(Object.is(count, 1))
+    console.assert(Object.is(counter, 1))
+  })
+
+  it('should observe basic properties', () => {
+    let dummy
+
+    const counter = reactive({
+      num: 0
+    })
+
+    effect(() => {
+      dummy = counter.num
+    })
+
+    console.assert(Object.is(dummy, 0))
+
+    counter.num = 7
+
+    console.assert(Object.is(dummy, 7))
   })
 })

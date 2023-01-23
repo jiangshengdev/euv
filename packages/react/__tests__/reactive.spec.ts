@@ -21,7 +21,12 @@ describe('react/reactive', () => {
   })
 
   test('observed value should proxy mutations to original (Object)', () => {
-    const original: any = {
+    interface FooBar {
+      foo?: number
+      bar?: number
+    }
+
+    const original: FooBar = {
       foo: 1
     }
     const observed = reactive(original)
@@ -38,7 +43,12 @@ describe('react/reactive', () => {
   })
 
   test('original value change should reflect in observed value (Object)', () => {
-    const original: any = {
+    interface FooBar {
+      foo?: number
+      bar?: number
+    }
+
+    const original: FooBar = {
       foo: 1
     }
     const observed = reactive(original)
