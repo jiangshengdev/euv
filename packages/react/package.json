@@ -1,0 +1,19 @@
+{
+  "name": "@euv/react",
+  "version": "1.0.0",
+  "description": "@euv/react",
+  "main": "index.js",
+  "sideEffects": false,
+  "buildOptions": {
+    "name": "EuvReactivity",
+    "formats": [
+      "esm-bundler",
+      "esm-browser",
+      "cjs",
+      "global"
+    ]
+  },
+  "dependencies": {
+    "@euv/shared": "workspace:*"
+  }
+}

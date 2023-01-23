@@ -70,6 +70,17 @@ beforeEach(() => {
   asserted.clear()
   warn = jest.spyOn(console, 'warn')
   warn.mockImplementation(() => {})
+
+  let assert = jest.spyOn(console, 'assert')
+  assert.mockImplementation((value: any, message?: string | undefined) => {
+    if (value) {
+      return
+    }
+
+    let msg = message ?? `console.assert`
+
+    throw new Error(`Assertion failed: ${msg}`)
+  })
 })
 
 afterEach(() => {

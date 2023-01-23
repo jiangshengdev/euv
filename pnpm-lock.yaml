@@ -34,6 +34,12 @@ importers:
       ts-jest: 29.0.5_gknik6k3e7uyjkjtbjkdmrff2q
       typescript: 4.9.4
 
+  packages/react:
+    specifiers:
+      '@euv/shared': workspace:*
+    dependencies:
+      '@euv/shared': link:../shared
+
   packages/reactivity:
     specifiers:
       '@euv/shared': workspace:*
