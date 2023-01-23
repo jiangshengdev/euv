@@ -5,7 +5,7 @@
   "main": "index.js",
   "sideEffects": false,
   "buildOptions": {
-    "name": "EuvReactivity",
+    "name": "EuvReact",
     "formats": [
       "esm-bundler",
       "esm-browser",

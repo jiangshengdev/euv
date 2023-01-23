@@ -6,8 +6,9 @@ export const extend = Object.assign
 
 export const isArray = Array.isArray
 
-export const isDate = (val: unknown): val is Date =>
-  toTypeString(val) === '[object Date]'
+export function isDate(val: unknown): val is Date {
+  return toTypeString(val) === '[object Date]'
+}
 
 export function isFunction(val: unknown): val is Function {
   let is = typeof val === 'function'
@@ -15,7 +16,9 @@ export function isFunction(val: unknown): val is Function {
   return is
 }
 
-export const isSymbol = (val: unknown): val is symbol => typeof val === 'symbol'
+export function isSymbol(val: unknown): val is symbol {
+  return typeof val === 'symbol'
+}
 
 export function isObject(val: unknown): val is Record<any, any> {
   let notNull = val !== null

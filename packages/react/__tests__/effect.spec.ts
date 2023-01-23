@@ -2,14 +2,14 @@ import { effect } from '@euv/react'
 
 describe('react/effect', () => {
   it('should run the passed function once (wrapped by a effect)', () => {
-    let dummy = 0
+    let count = 0
 
-    const fnSpy = function fnSpy() {
-      dummy++
+    const fn = function fn() {
+      count++
     }
 
-    effect(fnSpy)
+    effect(fn)
 
-    console.assert(Object.is(dummy, 1))
+    console.assert(Object.is(count, 1))
   })
 })
