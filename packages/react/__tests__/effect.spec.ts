@@ -4,11 +4,11 @@ describe('react/effect', () => {
   it('should run the passed function once (wrapped by a effect)', () => {
     let counter = 0
 
-    const fn = function fn() {
+    const update = function update() {
       counter++
     }
 
-    effect(fn)
+    effect(update)
 
     console.assert(Object.is(counter, 1))
   })
@@ -20,9 +20,11 @@ describe('react/effect', () => {
       num: 0
     })
 
-    effect(() => {
+    let update = function update() {
       dummy = counter.num
-    })
+    }
+
+    effect(update)
 
     console.assert(Object.is(dummy, 0))
 
