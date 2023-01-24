@@ -1,66 +1,41 @@
 import { reactive } from '@euv/react'
-import { looseEqual } from '@euv/shared'
 
 describe('react/reactive', () => {
   test('Object', () => {
-    const original = {
-      foo: 1
-    }
+    const original = { foo: 1 }
     const observed = reactive(original)
-
-    console.assert(!Object.is(observed, original))
-
+    expect(observed).not.toBe(original)
     // get
-    console.assert(Object.is(observed.foo, 1))
-
+    expect(observed.foo).toBe(1)
     // has
-    console.assert(Object.is('foo' in observed, true))
-
+    expect('foo' in observed).toBe(true)
     // ownKeys
-    console.assert(looseEqual(Object.keys(observed), ['foo']))
+    expect(Object.keys(observed)).toEqual(['foo'])
   })
 
   test('observed value should proxy mutations to original (Object)', () => {
-    interface FooBar {
-      foo?: number
-      bar?: number
-    }
-
-    const original: FooBar = {
-      foo: 1
-    }
+    const original: any = { foo: 1 }
     const observed = reactive(original)
-
     // set
     observed.bar = 1
-    console.assert(Object.is(observed.bar, 1))
-    console.assert(Object.is(original.bar, 1))
-
+    expect(observed.bar).toBe(1)
+    expect(original.bar).toBe(1)
     // delete
     delete observed.foo
-    console.assert(Object.is('foo' in observed, false))
-    console.assert(Object.is('foo' in original, false))
+    expect('foo' in observed).toBe(false)
+    expect('foo' in original).toBe(false)
   })
 
   test('original value change should reflect in observed value (Object)', () => {
-    interface FooBar {
-      foo?: number
-      bar?: number
-    }
-
-    const original: FooBar = {
-      foo: 1
-    }
+    const original: any = { foo: 1 }
     const observed = reactive(original)
-
     // set
     original.bar = 1
-    console.assert(Object.is(original.bar, 1))
-    console.assert(Object.is(observed.bar, 1))
-
+    expect(original.bar).toBe(1)
+    expect(observed.bar).toBe(1)
     // delete
     delete original.foo
-    console.assert(Object.is('foo' in original, false))
-    console.assert(Object.is('foo' in observed, false))
+    expect('foo' in original).toBe(false)
+    expect('foo' in observed).toBe(false)
   })
 })

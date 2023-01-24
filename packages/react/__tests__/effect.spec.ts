@@ -1,146 +1,87 @@
 import { effect, reactive } from '@euv/react'
-import { looseEqual } from '@euv/shared'
 
 describe('react/effect', () => {
   it('should run the passed function once (wrapped by a effect)', () => {
-    let counter = 0
-
-    const update = function update() {
-      counter++
-    }
-
-    effect(update)
-
-    console.assert(Object.is(counter, 1))
+    const fnSpy = jest.fn(() => {})
+    effect(fnSpy)
+    expect(fnSpy).toHaveBeenCalledTimes(1)
   })
 
   it('should observe basic properties', () => {
     let dummy
+    const counter = reactive({ num: 0 })
+    effect(() => (dummy = counter.num))
 
-    const counter = reactive({
-      num: 0
-    })
-
-    let update = function update() {
-      dummy = counter.num
-    }
-
-    effect(update)
-
-    console.assert(Object.is(dummy, 0))
-
+    expect(dummy).toBe(0)
     counter.num = 7
-
-    console.assert(Object.is(dummy, 7))
+    expect(dummy).toBe(7)
   })
 
   it('should observe multiple properties', () => {
     let dummy
+    const counter = reactive({ num1: 0, num2: 0 })
+    effect(() => (dummy = counter.num1 + counter.num1 + counter.num2))
 
-    const counter = reactive({
-      num1: 0,
-      num2: 0
-    })
-
-    const update = function update() {
-      let a = counter.num1
-      let b = counter.num1
-      let c = counter.num2
-
-      dummy = a + b + c
-    }
-
-    effect(update)
-
-    console.assert(Object.is(dummy, 0))
-
-    counter.num2 = 7
-    counter.num1 = 7
-
-    console.assert(Object.is(dummy, 21))
+    expect(dummy).toBe(0)
+    counter.num1 = counter.num2 = 7
+    expect(dummy).toBe(21)
   })
 
   it('should handle multiple effects', () => {
-    let dummy1
-    let dummy2
+    let dummy1, dummy2
+    const counter = reactive({ num: 0 })
+    effect(() => (dummy1 = counter.num))
+    effect(() => (dummy2 = counter.num))
 
-    const counter = reactive({
-      num: 0
-    })
-
-    let update1 = function update1() {
-      dummy1 = counter.num
-    }
-
-    let update2 = function update2() {
-      dummy2 = counter.num
-    }
-
-    effect(update1)
-    effect(update2)
-
-    console.assert(Object.is(dummy1, 0))
-    console.assert(Object.is(dummy2, 0))
-
+    expect(dummy1).toBe(0)
+    expect(dummy2).toBe(0)
     counter.num++
+    expect(dummy1).toBe(1)
+    expect(dummy2).toBe(1)
+  })
 
-    console.assert(Object.is(dummy1, 1))
-    console.assert(Object.is(dummy2, 1))
+  it('should avoid implicit infinite recursive loops with itself', () => {
+    const counter = reactive({ num: 0 })
+
+    const counterSpy = jest.fn(() => counter.num++)
+    effect(counterSpy)
+    expect(counter.num).toBe(1)
+    expect(counterSpy).toHaveBeenCalledTimes(1)
+    counter.num = 4
+    expect(counter.num).toBe(5)
+    expect(counterSpy).toHaveBeenCalledTimes(2)
   })
 
   it('should allow nested effects', () => {
     const nums = reactive({ num1: 0, num2: 1, num3: 2 })
+    const dummy: any = {}
 
-    const counter = {
-      parent: 0,
-      child: 0
-    }
-
-    interface Dummy {
-      num1?: number
-      num2?: number
-      num3?: number
-    }
-
-    const dummy: Dummy = {}
-
-    const childUpdate = function () {
-      counter.child++
-      return (dummy.num1 = nums.num1)
-    }
-
-    const childEffect = effect(childUpdate)
-
-    const parentUpdate = function parentUpdate() {
-      counter.parent++
+    const childSpy = jest.fn(() => (dummy.num1 = nums.num1))
+    const childeffect = effect(childSpy)
+    const parentSpy = jest.fn(() => {
       dummy.num2 = nums.num2
-      childEffect()
+      childeffect()
       dummy.num3 = nums.num3
-    }
+    })
+    effect(parentSpy)
 
-    effect(parentUpdate)
-
-    console.assert(looseEqual(dummy, { num1: 0, num2: 1, num3: 2 }))
-    console.assert(Object.is(counter.parent, 1))
-    console.assert(Object.is(counter.child, 2))
-
-    // this should only call the childEffect
+    expect(dummy).toEqual({ num1: 0, num2: 1, num3: 2 })
+    expect(parentSpy).toHaveBeenCalledTimes(1)
+    expect(childSpy).toHaveBeenCalledTimes(2)
+    // this should only call the childeffect
     nums.num1 = 4
-
-    console.assert(looseEqual(dummy, { num1: 4, num2: 1, num3: 2 }))
-    console.assert(Object.is(counter.parent, 1))
-    console.assert(Object.is(counter.child, 3))
-
-    // this calls the parentEffect, which calls the childEffect once
+    expect(dummy).toEqual({ num1: 4, num2: 1, num3: 2 })
+    expect(parentSpy).toHaveBeenCalledTimes(1)
+    expect(childSpy).toHaveBeenCalledTimes(3)
+    // this calls the parenteffect, which calls the childeffect once
     nums.num2 = 10
-    console.assert(looseEqual(dummy, { num1: 4, num2: 10, num3: 2 }))
-    console.assert(Object.is(counter.parent, 2))
-    console.assert(Object.is(counter.child, 4))
-
-    // this calls the parentEffect, which calls the childEffect once
+    expect(dummy).toEqual({ num1: 4, num2: 10, num3: 2 })
+    expect(parentSpy).toHaveBeenCalledTimes(2)
+    expect(childSpy).toHaveBeenCalledTimes(4)
+    // this calls the parenteffect, which calls the childeffect once
     nums.num3 = 7
-    console.assert(looseEqual(dummy, { num1: 4, num2: 10, num3: 7 }))
-    console.assert(Object.is(counter.parent, 3))
-    console.assert(Object.is(counter.child, 5))
+    expect(dummy).toEqual({ num1: 4, num2: 10, num3: 7 })
+    expect(parentSpy).toHaveBeenCalledTimes(3)
+    expect(childSpy).toHaveBeenCalledTimes(5)
   })
 })

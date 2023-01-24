@@ -8,10 +8,10 @@ type Effects = Set<Effect>
 type Bucket = Map<Key, Effects>
 type Store = WeakMap<Target, Bucket>
 
-let store: Store = new WeakMap()
+const store: Store = new WeakMap()
 
 function track(target: Target, key: Key) {
-  let activeEffect = getActiveEffect()
+  const activeEffect = getActiveEffect()
   if (!activeEffect) {
     return
   }
@@ -32,32 +32,35 @@ function track(target: Target, key: Key) {
 }
 
 function trigger(target: Target, key: Key) {
-  let bucket: Bucket | undefined = store.get(target)
+  const activeEffect = getActiveEffect()
+  const bucket: Bucket | undefined = store.get(target)
   if (!bucket) {
     return
   }
 
-  let effects: Effects | undefined = bucket.get(key)
+  const effects: Effects | undefined = bucket.get(key)
   if (!effects) {
     return
   }
 
   for (const effect of effects) {
-    effect.run()
+    if (effect !== activeEffect) {
+      effect.run()
+    }
   }
 }
 
 export function reactive<T extends Target>(target: T): T {
-  let proxy = new Proxy<T>(target, {
-    get(target: T, key: Key, receiver: any): any {
-      let result = Reflect.get(target, key, receiver)
+  const proxy = new Proxy<T>(target, {
+    get(target: T, key: Key, receiver: object): any {
+      const result = Reflect.get(target, key, receiver)
 
       track(target, key)
 
       return result
     },
-    set(target: T, key: Key, value: any, receiver: any): boolean {
-      let result = Reflect.set(target, key, value, receiver)
+    set(target: T, key: Key, value: unknown, receiver: object): boolean {
+      const result = Reflect.set(target, key, value, receiver)
 
       trigger(target, key)
 
