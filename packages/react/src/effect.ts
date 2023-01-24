@@ -2,20 +2,34 @@ export class Effect<T = any> {
   constructor(public fn: () => T) {}
 
   run() {
-    activeEffect = this
+    activeStack.push(this)
 
     let result = this.fn()
 
-    activeEffect = undefined
+    activeStack.pop()
 
     return result
   }
 }
 
-export let activeEffect: Effect | undefined
+export let activeStack: Effect[] = []
 
-export function effect<T = any>(fn: () => T) {
+export function getActiveEffect(): Effect | undefined {
+  return activeStack[activeStack.length - 1]
+}
+
+interface Runner<T = any> {
+  effect: Effect
+
+  (): T
+}
+
+export function effect<T = any>(fn: () => T): Runner<T> {
   let _effect = new Effect(fn)
 
   _effect.run()
+
+  let runner = _effect.run.bind(_effect) as Runner<T>
+  runner.effect = _effect
+  return runner
 }

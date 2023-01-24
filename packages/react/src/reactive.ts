@@ -1,4 +1,4 @@
-import { activeEffect, Effect } from './effect'
+import { Effect, getActiveEffect } from './effect'
 
 type Key = string | symbol
 
@@ -11,6 +11,7 @@ type Store = WeakMap<Target, Bucket>
 let store: Store = new WeakMap()
 
 function track(target: Target, key: Key) {
+  let activeEffect = getActiveEffect()
   if (!activeEffect) {
     return
   }
