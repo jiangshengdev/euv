@@ -37,14 +37,14 @@ function targetTypeMap(rawType: string) {
 }
 
 function getTargetType(value: Target) {
-  let skip = value[ReactiveFlags.SKIP]
-  let notExtensible = !Object.isExtensible(value)
+  const skip = value[ReactiveFlags.SKIP]
+  const notExtensible = !Object.isExtensible(value)
 
   if (skip || notExtensible) {
     return TargetType.INVALID
   } else {
-    let rawType = toRawType(value)
-    let targetType = targetTypeMap(rawType)
+    const rawType = toRawType(value)
+    const targetType = targetTypeMap(rawType)
 
     return targetType
   }
@@ -76,6 +76,7 @@ export type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRefSimple<T>
  * ```
  */
 export function reactive<T extends object>(target: T): UnwrapNestedRefs<T>
+
 export function reactive(target: object) {
   return createReactiveObject(
     target,
@@ -110,12 +111,14 @@ function createReactiveObject(
 
   // target already has corresponding Proxy
   const existingProxy = proxyMap.get(target)
+
   if (existingProxy) {
     return existingProxy
   }
 
   // only specific value types can be observed.
   const targetType = getTargetType(target)
+
   if (targetType === TargetType.INVALID) {
     return target
   }
@@ -124,13 +127,14 @@ function createReactiveObject(
     target,
     targetType === TargetType.COLLECTION ? collectionHandlers : baseHandlers
   )
+
   proxyMap.set(target, proxy)
 
   return proxy
 }
 
 export function isReactive(value: unknown): boolean {
-  let is = !!(value && (value as Target)[ReactiveFlags.IS_REACTIVE])
+  const is = !!(value && (value as Target)[ReactiveFlags.IS_REACTIVE])
 
   return is
 }

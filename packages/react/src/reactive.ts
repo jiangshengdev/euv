@@ -10,19 +10,22 @@ type Store = WeakMap<Target, Bucket>
 
 const store: Store = new WeakMap()
 
-function track(target: Target, key: Key) {
+function track(target: Target, key: Key): void {
   const activeEffect = getActiveEffect()
+
   if (!activeEffect) {
     return
   }
 
   let bucket: Bucket | undefined = store.get(target)
+
   if (!bucket) {
     bucket = new Map()
     store.set(target, bucket)
   }
 
   let effects: Effects | undefined = bucket.get(key)
+
   if (!effects) {
     effects = new Set()
     bucket.set(key, effects)
@@ -31,14 +34,16 @@ function track(target: Target, key: Key) {
   effects.add(activeEffect)
 }
 
-function trigger(target: Target, key: Key) {
+function trigger(target: Target, key: Key): void {
   const activeEffect = getActiveEffect()
   const bucket: Bucket | undefined = store.get(target)
+
   if (!bucket) {
     return
   }
 
   const effects: Effects | undefined = bucket.get(key)
+
   if (!effects) {
     return
   }

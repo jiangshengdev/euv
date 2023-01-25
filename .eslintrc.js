@@ -25,6 +25,20 @@ module.exports = {
       'error',
       'ObjectPattern > RestElement',
       'AwaitExpression'
+    ],
+    'prefer-const': 'error',
+    'padding-line-between-statements': [
+      'error',
+      { blankLine: 'always', prev: '*', next: 'return' },
+      { blankLine: 'always', prev: '*', next: ['const', 'let', 'var'] },
+      { blankLine: 'always', prev: ['const', 'let', 'var'], next: '*' },
+      { blankLine: 'always', prev: '*', next: ['block-like', 'block'] },
+      { blankLine: 'always', prev: ['block-like', 'block'], next: '*' },
+      {
+        blankLine: 'any',
+        prev: ['const', 'let', 'var'],
+        next: ['const', 'let', 'var']
+      }
     ]
   },
   overrides: [
@@ -34,6 +48,7 @@ module.exports = {
       rules: {
         'no-restricted-globals': 'off',
         'no-restricted-syntax': 'off',
+        'padding-line-between-statements': 'off',
         'jest/no-disabled-tests': 'error',
         'jest/no-focused-tests': 'error'
       }

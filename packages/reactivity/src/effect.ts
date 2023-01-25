@@ -7,6 +7,7 @@ import { createDep, Dep } from './dep'
 // which maintains a Set of subscribers, but we simply store them as
 // raw Sets to reduce memory overhead.
 type KeyToDepMap = Map<any, Dep>
+
 const targetMap = new WeakMap<any, KeyToDepMap>()
 
 export type EffectScheduler = (...args: any[]) => any
@@ -25,7 +26,7 @@ export class ReactiveEffect<T = any> {
 
   run() {
     if (!this.active) {
-      let result = this.fn()
+      const result = this.fn()
 
       return result
     }
@@ -35,7 +36,8 @@ export class ReactiveEffect<T = any> {
       activeEffect = this
 
       cleanupEffect(this)
-      let result = this.fn()
+
+      const result = this.fn()
 
       return result
     } finally {
@@ -82,13 +84,17 @@ export function effect<T = any>(
   options?: ReactiveEffectOptions
 ): ReactiveEffectRunner {
   const _effect = new ReactiveEffect(fn)
+
   if (options) {
     extend(_effect, options)
   }
+
   _effect.run()
 
   const runner = _effect.run.bind(_effect) as ReactiveEffectRunner
+
   runner.effect = _effect
+
   return runner
 }
 
@@ -102,12 +108,14 @@ export function track(target: object, type: TrackOpTypes, key: unknown) {
   }
 
   let depsMap = targetMap.get(target)
+
   if (!depsMap) {
     depsMap = new Map()
     targetMap.set(target, depsMap)
   }
 
   let dep = depsMap.get(key)
+
   if (!dep) {
     dep = createDep()
     depsMap.set(key, dep)
@@ -117,7 +125,7 @@ export function track(target: object, type: TrackOpTypes, key: unknown) {
 }
 
 export function trackEffects(dep: Dep) {
-  let shouldTrack = !dep.has(activeEffect!)
+  const shouldTrack = !dep.has(activeEffect!)
 
   if (!shouldTrack) {
     return
@@ -136,16 +144,18 @@ export function trigger(
   oldTarget?: Map<unknown, unknown> | Set<unknown>
 ) {
   const depsMap = targetMap.get(target)
+
   if (!depsMap) {
     // never been tracked
     return
   }
 
-  let deps: (Dep | undefined)[] = []
+  const deps: (Dep | undefined)[] = []
 
   deps.push(depsMap.get(key))
 
   const effects: ReactiveEffect[] = []
+
   for (const dep of deps) {
     if (dep) {
       effects.push(...dep)
@@ -158,6 +168,7 @@ export function trigger(
 export function triggerEffects(dep: Dep | ReactiveEffect[]) {
   // spread into array for stabilization
   const effects = isArray(dep) ? dep : [...dep]
+
   for (const effect of effects) {
     triggerEffect(effect)
   }

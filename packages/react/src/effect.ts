@@ -30,6 +30,8 @@ export function effect<T = any>(fn: () => T): Runner<T> {
   _effect.run()
 
   const runner = _effect.run.bind(_effect) as Runner<T>
+
   runner.effect = _effect
+
   return runner
 }
