@@ -1,4 +1,4 @@
-export const activeStack: Effect[] = []
+const activeStack: Effect[] = []
 
 export function getActiveEffect(): Effect | undefined {
   return activeStack[activeStack.length - 1]

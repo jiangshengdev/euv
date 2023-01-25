@@ -2,7 +2,11 @@ import { Effect, getActiveEffect } from './effect'
 
 type Key = string | symbol
 
-interface Target {}
+const IS_REACTIVE = Symbol()
+
+interface Target extends Object {
+  [IS_REACTIVE]?: boolean
+}
 
 type Effects = Set<Effect>
 type Bucket = Map<Key, Effects>
@@ -58,6 +62,10 @@ function trigger(target: Target, key: Key): void {
 export function reactive<T extends Target>(target: T): T {
   const proxy = new Proxy<T>(target, {
     get(target: T, key: Key, receiver: object): any {
+      if (key === IS_REACTIVE) {
+        return true
+      }
+
       const result = Reflect.get(target, key, receiver)
 
       track(target, key)
@@ -74,4 +82,8 @@ export function reactive<T extends Target>(target: T): T {
   })
 
   return proxy
+}
+
+export function isReactive(value: unknown): boolean {
+  return !!(value && (value as Target)[IS_REACTIVE])
 }
