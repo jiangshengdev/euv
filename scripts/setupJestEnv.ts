@@ -1,7 +1,9 @@
 expect.extend({
   toHaveBeenWarned(received: string) {
     asserted.add(received)
+
     const passed = warn.mock.calls.some(args => args[0].includes(received))
+
     if (passed) {
       return {
         pass: true,
@@ -9,6 +11,7 @@ expect.extend({
       }
     } else {
       const msgs = warn.mock.calls.map(args => args[0]).join('\n - ')
+
       return {
         pass: false,
         message: () =>
@@ -22,8 +25,10 @@ expect.extend({
 
   toHaveBeenWarnedLast(received: string) {
     asserted.add(received)
+
     const passed =
       warn.mock.calls[warn.mock.calls.length - 1][0].includes(received)
+
     if (passed) {
       return {
         pass: true,
@@ -31,6 +36,7 @@ expect.extend({
       }
     } else {
       const msgs = warn.mock.calls.map(args => args[0]).join('\n - ')
+
       return {
         pass: false,
         message: () =>
@@ -41,7 +47,9 @@ expect.extend({
 
   toHaveBeenWarnedTimes(received: string, n: number) {
     asserted.add(received)
+
     let found = 0
+
     warn.mock.calls.forEach(args => {
       if (args[0].includes(received)) {
         found++
@@ -71,13 +79,14 @@ beforeEach(() => {
   warn = jest.spyOn(console, 'warn')
   warn.mockImplementation(() => {})
 
-  let assert = jest.spyOn(console, 'assert')
+  const assert = jest.spyOn(console, 'assert')
+
   assert.mockImplementation((value: any, message?: string | undefined) => {
     if (value) {
       return
     }
 
-    let msg = message ?? `console.assert`
+    const msg = message ?? `console.assert`
 
     throw new Error(`Assertion failed: ${msg}`)
   })
@@ -92,7 +101,9 @@ afterEach(() => {
         return received.includes(assertedMsg)
       })
     })
+
   warn.mockRestore()
+
   if (nonAssertedWarnings.length) {
     throw new Error(
       `test case threw unexpected warnings:\n - ${nonAssertedWarnings.join(

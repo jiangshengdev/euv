@@ -35,6 +35,7 @@ const relativeOutfile = relative(process.cwd(), outfile)
 // resolve externals
 // TODO this logic is largely duplicated from rollup.config.js
 let external = []
+
 if (!inlineDeps) {
   // cjs & esm-bundler: external all deps
   if (format === 'cjs' || format.includes('esm-bundler')) {
@@ -53,6 +54,7 @@ if (!inlineDeps) {
     const consolidateDeps = require.resolve('@euv/consolidate/package.json', {
       paths: [resolve(__dirname, `../packages/${target}/`)]
     })
+
     external = [
       ...external,
       ...Object.keys(require(consolidateDeps).devDependencies),

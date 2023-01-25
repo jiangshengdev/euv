@@ -10,9 +10,9 @@ interface Target extends Object {
 
 type Effects = Set<Effect>
 type Bucket = Map<Key, Effects>
-type Store = WeakMap<Target, Bucket>
+type Store = Map<Target, Bucket>
 
-const store: Store = new WeakMap()
+export const store: Store = new Map()
 
 function track(target: Target, key: Key): void {
   const activeEffect = getActiveEffect()
