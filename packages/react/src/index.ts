@@ -8,4 +8,4 @@ export {
   Store,
   Target
 } from './reactive'
-export { effect, pack } from './effect'
+export { effect, Effect, pack } from './effect'

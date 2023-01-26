@@ -9,6 +9,7 @@ export function getActiveEffect(): Effect | undefined {
 export class Effect<T = any> {
   id: string
   name: string
+  parentId?: string
 
   constructor(public fn: () => T) {
     this.id = uuidv4()
@@ -16,6 +17,7 @@ export class Effect<T = any> {
   }
 
   run() {
+    this.parentId = getActiveEffect()?.id
     effectStack.push(this)
 
     const result = this.fn()

@@ -1,5 +1,5 @@
 import G6 from '@antv/g6'
-import { Bucket, Key, pack, store, Target } from '@euv/react'
+import { Bucket, Effect, Key, pack, store, Target } from '@euv/react'
 import { EdgeConfig, NodeConfig, TreeGraphData } from '@antv/g6-core/es/types'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -58,6 +58,19 @@ const data: TreeGraphData = {
 }
 const targets: Target[] = [...store.keys()]
 
+function addEffects(bucket: Bucket, key: Key, keyNode: NodeConfig) {
+  const effects = bucket.get(key)
+
+  if (effects) {
+    for (const effect of effects) {
+      edges.push({
+        source: keyNode.id,
+        target: effect.id
+      })
+    }
+  }
+}
+
 function addKey(key: Key, bucket: Bucket, targetNode: NodeConfig) {
   const label = `🔑${String(key)}`
   const keyNode: NodeConfig = {
@@ -69,22 +82,23 @@ function addKey(key: Key, bucket: Bucket, targetNode: NodeConfig) {
   }
 
   nodes.push(keyNode)
-
-  const effects = bucket.get(key)
-
-  if (effects) {
-    for (const effect of effects) {
-      edges.push({
-        source: keyNode.id,
-        target: effect.id
-      })
-    }
-  }
-
+  addEffects(bucket, key, keyNode)
   edges.push({
     source: targetNode.id,
     target: keyNode.id
   })
+}
+
+function addKeys(target: Target, targetNode: NodeConfig) {
+  const bucket = store.get(target)
+
+  if (bucket) {
+    const keys = [...bucket.keys()]
+
+    for (const key of keys) {
+      addKey(key, bucket, targetNode)
+    }
+  }
 }
 
 function addTarget(target: Target) {
@@ -99,38 +113,52 @@ function addTarget(target: Target) {
   }
 
   nodes.push(targetNode)
-
-  const bucket = store.get(target)
-
-  if (bucket) {
-    const keys = [...bucket.keys()]
-
-    for (const key of keys) {
-      addKey(key, bucket, targetNode)
-    }
-  }
-
+  addKeys(target, targetNode)
   edges.push({
     source: storeNode.id,
     target: targetNode.id
   })
 }
 
-for (const target of targets) {
-  addTarget(target)
+function addTargets() {
+  for (const target of targets) {
+    addTarget(target)
+  }
 }
 
-for (const effect of pack) {
+function addEffect(effect: Effect) {
   const label = `🧪${effect.name}`
-
-  nodes.push({
+  const parentId = effect.parentId
+  const effectNode = {
     id: effect.id,
     label: label,
     style: {
       stroke: '#44D7B6'
     }
-  })
+  }
+
+  nodes.push(effectNode)
+
+  if (parentId) {
+    edges.push({
+      source: parentId,
+      target: effectNode.id
+    })
+  }
 }
+
+function addPack() {
+  for (const effect of pack) {
+    addEffect(effect)
+  }
+}
+
+function init() {
+  addTargets()
+  addPack()
+}
+
+init()
 
 const container = document.getElementById('container')
 const width = container!.scrollWidth
