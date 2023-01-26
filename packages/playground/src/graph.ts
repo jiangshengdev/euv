@@ -43,7 +43,7 @@ function fittingString(
 
 const globalFontSize = 12
 const storeNode: NodeConfig = {
-  id: '0',
+  id: uuidv4(),
   label: '🏪store',
   style: {
     stroke: '#000'
@@ -56,9 +56,8 @@ const data: TreeGraphData = {
   nodes: nodes,
   edges: edges
 }
-const targets: Target[] = [...store.keys()]
 
-function addEffects(bucket: Bucket, key: Key, keyNode: NodeConfig) {
+function addEffects(key: Key, bucket: Bucket, keyNode: NodeConfig) {
   const effects = bucket.get(key)
 
   if (effects) {
@@ -82,7 +81,7 @@ function addKey(key: Key, bucket: Bucket, targetNode: NodeConfig) {
   }
 
   nodes.push(keyNode)
-  addEffects(bucket, key, keyNode)
+  addEffects(key, bucket, keyNode)
   edges.push({
     source: targetNode.id,
     target: keyNode.id
@@ -121,6 +120,8 @@ function addTarget(target: Target) {
 }
 
 function addTargets() {
+  const targets: Target[] = [...store.keys()]
+
   for (const target of targets) {
     addTarget(target)
   }
