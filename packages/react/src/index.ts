@@ -1,11 +1,11 @@
 export {
-  reactive,
-  isReactive,
-  store,
-  Target,
-  Store,
   Bucket,
   Effects,
-  Key
+  isReactive,
+  Key,
+  reactive,
+  store,
+  Store,
+  Target
 } from './reactive'
 export { effect, pack } from './effect'

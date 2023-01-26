@@ -11,7 +11,6 @@ export interface Target extends Object {
 export type Effects = Set<Effect>
 export type Bucket = Map<Key, Effects>
 export type Store = Map<Target, Bucket>
-
 export const store: Store = new Map()
 
 function track(target: Target, key: Key): void {

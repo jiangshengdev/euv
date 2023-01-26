@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from 'uuid'
 
-const activeStack: Effect[] = []
+const effectStack: Effect[] = []
 
 export function getActiveEffect(): Effect | undefined {
-  return activeStack[activeStack.length - 1]
+  return effectStack.at(-1)
 }
 
 export class Effect<T = any> {
@@ -16,11 +16,11 @@ export class Effect<T = any> {
   }
 
   run() {
-    activeStack.push(this)
+    effectStack.push(this)
 
     const result = this.fn()
 
-    activeStack.pop()
+    effectStack.pop()
 
     return result
   }
@@ -38,7 +38,6 @@ export function effect<T = any>(fn: () => T): Runner<T> {
   const _effect = new Effect(fn)
 
   pack.add(_effect)
-
   _effect.run()
 
   const runner = _effect.run.bind(_effect) as Runner<T>

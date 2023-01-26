@@ -1,7 +1,7 @@
-import { Bucket, Key, pack, store, Target } from '@euv/react'
 import G6 from '@antv/g6'
-import { v4 as uuidv4 } from 'uuid'
+import { Bucket, Key, pack, store, Target } from '@euv/react'
 import { EdgeConfig, NodeConfig, TreeGraphData } from '@antv/g6-core/es/types'
+import { v4 as uuidv4 } from 'uuid'
 
 /**
  * format the string
@@ -42,12 +42,13 @@ function fittingString(
 }
 
 const globalFontSize = 12
-
 const storeNode: NodeConfig = {
   id: '0',
-  label: 'store'
+  label: '🏪store',
+  style: {
+    stroke: '#000'
+  }
 }
-
 const nodes: NodeConfig[] = [storeNode]
 const edges: EdgeConfig[] = []
 const data: TreeGraphData = {
@@ -55,13 +56,16 @@ const data: TreeGraphData = {
   nodes: nodes,
   edges: edges
 }
-
 const targets: Target[] = [...store.keys()]
 
 function addKey(key: Key, bucket: Bucket, targetNode: NodeConfig) {
+  const label = `🔑${String(key)}`
   const keyNode: NodeConfig = {
     id: uuidv4(),
-    label: String(key)
+    label: label,
+    style: {
+      stroke: '#F7B500'
+    }
   }
 
   nodes.push(keyNode)
@@ -84,9 +88,14 @@ function addKey(key: Key, bucket: Bucket, targetNode: NodeConfig) {
 }
 
 function addTarget(target: Target) {
+  const text = fittingString(JSON.stringify(target), 100, globalFontSize)
+  const label = `🪣${text}`
   const targetNode: NodeConfig = {
     id: uuidv4(),
-    label: fittingString(JSON.stringify(target), 100, globalFontSize)
+    label: label,
+    style: {
+      stroke: '#32C5FF'
+    }
   }
 
   nodes.push(targetNode)
@@ -112,9 +121,14 @@ for (const target of targets) {
 }
 
 for (const effect of pack) {
+  const label = `🧪${effect.name}`
+
   nodes.push({
     id: effect.id,
-    label: effect.name
+    label: label,
+    style: {
+      stroke: '#44D7B6'
+    }
   })
 }
 
@@ -138,11 +152,11 @@ const graph = new G6.Graph({
     ranksepFunc: () => 1
   },
   defaultNode: {
-    size: [100, 40],
+    size: [120, 40],
     type: 'rect',
     style: {
       lineWidth: 1,
-      stroke: '#5B8FF9',
+      stroke: '#0091FF',
       fill: '#fff',
       fontSize: globalFontSize
     }
