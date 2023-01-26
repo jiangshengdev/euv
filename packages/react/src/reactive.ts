@@ -1,6 +1,6 @@
 import { Effect, getActiveEffect } from './effect'
 
-type Key = string | symbol
+export type Key = string | symbol
 
 const IS_REACTIVE = Symbol()
 
@@ -8,9 +8,9 @@ export interface Target extends Object {
   [IS_REACTIVE]?: boolean
 }
 
-type Effects = Set<Effect>
-type Bucket = Map<Key, Effects>
-type Store = Map<Target, Bucket>
+export type Effects = Set<Effect>
+export type Bucket = Map<Key, Effects>
+export type Store = Map<Target, Bucket>
 
 export const store: Store = new Map()
 

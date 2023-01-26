@@ -1,4 +1,4 @@
-import { pack, store, Target } from '@euv/react'
+import { Bucket, Key, pack, store, Target } from '@euv/react'
 import G6 from '@antv/g6'
 import { v4 as uuidv4 } from 'uuid'
 import { EdgeConfig, NodeConfig, TreeGraphData } from '@antv/g6-core/es/types'
@@ -10,7 +10,11 @@ import { EdgeConfig, NodeConfig, TreeGraphData } from '@antv/g6-core/es/types'
  * @param {number} fontSize font size
  * @return {string} the processed result
  */
-const fittingString = (str: string, maxWidth: number, fontSize: number) => {
+function fittingString(
+  str: string,
+  maxWidth: number,
+  fontSize: number
+): string {
   let currentWidth = 0
   let res = str
   const pattern = new RegExp('[\u4E00-\u9FA5]+') // distinguish the Chinese charactors and letters
@@ -39,13 +43,12 @@ const fittingString = (str: string, maxWidth: number, fontSize: number) => {
 
 const globalFontSize = 12
 
-const storeNode = {
+const storeNode: NodeConfig = {
   id: '0',
   label: 'store'
 }
 
 const nodes: NodeConfig[] = [storeNode]
-
 const edges: EdgeConfig[] = []
 const data: TreeGraphData = {
   id: uuidv4(),
@@ -53,10 +56,35 @@ const data: TreeGraphData = {
   edges: edges
 }
 
-const targets = [...store.keys()]
+const targets: Target[] = [...store.keys()]
+
+function addKey(key: Key, bucket: Bucket, targetNode: NodeConfig) {
+  const keyNode: NodeConfig = {
+    id: uuidv4(),
+    label: String(key)
+  }
+
+  nodes.push(keyNode)
+
+  const effects = bucket.get(key)
+
+  if (effects) {
+    for (const effect of effects) {
+      edges.push({
+        source: keyNode.id,
+        target: effect.id
+      })
+    }
+  }
+
+  edges.push({
+    source: targetNode.id,
+    target: keyNode.id
+  })
+}
 
 function addTarget(target: Target) {
-  const targetNode = {
+  const targetNode: NodeConfig = {
     id: uuidv4(),
     label: fittingString(JSON.stringify(target), 100, globalFontSize)
   }
@@ -69,28 +97,7 @@ function addTarget(target: Target) {
     const keys = [...bucket.keys()]
 
     for (const key of keys) {
-      const keyNode: NodeConfig = {
-        id: uuidv4(),
-        label: String(key)
-      }
-
-      nodes.push(keyNode)
-
-      const effects = bucket.get(key)
-
-      if (effects) {
-        for (const effect of effects) {
-          edges.push({
-            source: keyNode.id,
-            target: effect.id
-          })
-        }
-      }
-
-      edges.push({
-        source: targetNode.id,
-        target: keyNode.id
-      })
+      addKey(key, bucket, targetNode)
     }
   }
 

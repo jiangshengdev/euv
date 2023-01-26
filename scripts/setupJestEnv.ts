@@ -81,12 +81,12 @@ beforeEach(() => {
 
   const assert = jest.spyOn(console, 'assert')
 
-  assert.mockImplementation((value: any, message?: string | undefined) => {
+  assert.mockImplementation((value: any, message?: string) => {
     if (value) {
       return
     }
 
-    const msg = message ?? `console.assert`
+    const msg = message ?? 'console.assert'
 
     throw new Error(`Assertion failed: ${msg}`)
   })
