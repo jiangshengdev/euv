@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "scripts": {
     "lint": "eslint --cache --ext .ts packages/*/{src,__tests__}/**.ts",
+    "format": "prettier --write --cache --parser typescript \"**/*.[tj]s?(x)\"",
     "dev-esm": "node scripts/dev.js -if esm-bundler-runtime",
     "dev-react": "node scripts/dev.js react -f esm",
-    "format": "prettier --write --cache --parser typescript \"**/*.[tj]s?(x)\""
+    "dev-serve": "vite packages/playground --host"
   },
   "license": "MIT",
   "devDependencies": {
@@ -22,6 +23,7 @@
     "prettier": "^2.8.3",
     "puppeteer": "^19.5.2",
     "ts-jest": "^29.0.5",
-    "typescript": "^4.9.4"
+    "typescript": "^4.9.4",
+    "vite": "^4.0.4"
   }
 }

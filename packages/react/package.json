@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "@euv/react",
   "main": "index.js",
+  "module": "dist/react.esm.js",
   "sideEffects": false,
   "buildOptions": {
     "name": "EuvReact",
@@ -13,7 +14,11 @@
       "global"
     ]
   },
+  "devDependencies": {
+    "@types/uuid": "^9.0.0"
+  },
   "dependencies": {
-    "@euv/shared": "workspace:*"
+    "@euv/shared": "workspace:*",
+    "uuid": "^9.0.0"
   }
 }

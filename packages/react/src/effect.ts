@@ -1,21 +1,50 @@
+import { v4 as uuidv4 } from 'uuid'
+
+const effectStack: Effect[] = []
+
+export function getActiveEffect(): Effect | undefined {
+  return effectStack.at(-1)
+}
+
 export class Effect<T = any> {
-  constructor(public fn: () => T) {}
+  id: string
+  name: string
+  parentId?: string
+
+  constructor(public fn: () => T) {
+    this.id = uuidv4()
+    this.name = fn.name
+  }
 
   run() {
-    activeEffect = this
+    this.parentId = getActiveEffect()?.id
+    effectStack.push(this)
 
-    let result = this.fn()
+    const result = this.fn()
 
-    activeEffect = undefined
+    effectStack.pop()
 
     return result
   }
 }
 
-export let activeEffect: Effect | undefined
+interface Runner<T = any> {
+  effect: Effect
 
-export function effect<T = any>(fn: () => T) {
-  let _effect = new Effect(fn)
+  (): T
+}
 
+export const pack: Set<Effect> = new Set()
+
+export function effect<T = any>(fn: () => T): Runner<T> {
+  const _effect = new Effect(fn)
+
+  pack.add(_effect)
   _effect.run()
+
+  const runner = _effect.run.bind(_effect) as Runner<T>
+
+  runner.effect = _effect
+
+  return runner
 }

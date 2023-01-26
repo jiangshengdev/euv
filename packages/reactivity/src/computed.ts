@@ -44,10 +44,12 @@ export class ComputedRefImpl<T> {
 
   get value() {
     trackRefValue(this)
+
     if (this._dirty) {
       this._dirty = false
       this._value = this.effect.run()!
     }
+
     return this._value
   }
 
@@ -60,6 +62,7 @@ export function computed<T>(getter: ComputedGetter<T>): ComputedRef<T>
 export function computed<T>(
   options: WritableComputedOptions<T>
 ): WritableComputedRef<T>
+
 export function computed<T>(
   getterOrOptions: ComputedGetter<T> | WritableComputedOptions<T>
 ) {
@@ -67,6 +70,7 @@ export function computed<T>(
   let setter: ComputedSetter<T>
 
   const onlyGetter = isFunction(getterOrOptions)
+
   if (onlyGetter) {
     getter = getterOrOptions
     setter = __DEV__

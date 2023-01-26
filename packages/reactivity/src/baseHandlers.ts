@@ -35,7 +35,7 @@ function createSetter() {
     value: unknown,
     receiver: object
   ): boolean {
-    let oldValue = (target as any)[key]
+    const oldValue = (target as any)[key]
 
     const result = Reflect.set(target, key, value, receiver)
 

@@ -1,27 +1,34 @@
-import { activeEffect, Effect } from './effect'
+import { Effect, getActiveEffect } from './effect'
 
-type Key = string | symbol
+export type Key = string | symbol
 
-interface Target {}
+const IS_REACTIVE = Symbol()
 
-type Effects = Set<Effect>
-type Bucket = Map<Key, Effects>
-type Store = WeakMap<Target, Bucket>
+export interface Target extends Object {
+  [IS_REACTIVE]?: boolean
+}
 
-let store: Store = new WeakMap()
+export type Effects = Set<Effect>
+export type Bucket = Map<Key, Effects>
+export type Store = Map<Target, Bucket>
+export const store: Store = new Map()
 
-function track(target: Target, key: Key) {
+function track(target: Target, key: Key): void {
+  const activeEffect = getActiveEffect()
+
   if (!activeEffect) {
     return
   }
 
   let bucket: Bucket | undefined = store.get(target)
+
   if (!bucket) {
     bucket = new Map()
     store.set(target, bucket)
   }
 
   let effects: Effects | undefined = bucket.get(key)
+
   if (!effects) {
     effects = new Set()
     bucket.set(key, effects)
@@ -30,33 +37,42 @@ function track(target: Target, key: Key) {
   effects.add(activeEffect)
 }
 
-function trigger(target: Target, key: Key) {
-  let bucket: Bucket | undefined = store.get(target)
+function trigger(target: Target, key: Key): void {
+  const activeEffect = getActiveEffect()
+  const bucket: Bucket | undefined = store.get(target)
+
   if (!bucket) {
     return
   }
 
-  let effects: Effects | undefined = bucket.get(key)
+  const effects: Effects | undefined = bucket.get(key)
+
   if (!effects) {
     return
   }
 
   for (const effect of effects) {
-    effect.run()
+    if (effect !== activeEffect) {
+      effect.run()
+    }
   }
 }
 
 export function reactive<T extends Target>(target: T): T {
-  let proxy = new Proxy<T>(target, {
-    get(target: T, key: Key, receiver: any): any {
-      let result = Reflect.get(target, key, receiver)
+  const proxy = new Proxy<T>(target, {
+    get(target: T, key: Key, receiver: object): any {
+      if (key === IS_REACTIVE) {
+        return true
+      }
+
+      const result = Reflect.get(target, key, receiver)
 
       track(target, key)
 
       return result
     },
-    set(target: T, key: Key, value: any, receiver: any): boolean {
-      let result = Reflect.set(target, key, value, receiver)
+    set(target: T, key: Key, value: unknown, receiver: object): boolean {
+      const result = Reflect.set(target, key, value, receiver)
 
       trigger(target, key)
 
@@ -65,4 +81,8 @@ export function reactive<T extends Target>(target: T): T {
   })
 
   return proxy
+}
+
+export function isReactive(value: unknown): boolean {
+  return !!(value && (value as Target)[IS_REACTIVE])
 }
