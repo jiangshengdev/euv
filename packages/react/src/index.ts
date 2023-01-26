@@ -1,2 +1,2 @@
-export { reactive, isReactive, store } from './reactive'
-export { effect } from './effect'
+export { reactive, isReactive, store, Target } from './reactive'
+export { effect, pack } from './effect'

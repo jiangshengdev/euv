@@ -4,7 +4,7 @@ type Key = string | symbol
 
 const IS_REACTIVE = Symbol()
 
-interface Target extends Object {
+export interface Target extends Object {
   [IS_REACTIVE]?: boolean
 }
 

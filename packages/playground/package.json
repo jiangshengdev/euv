@@ -7,9 +7,12 @@
     "serve": "vite preview"
   },
   "devDependencies": {
+    "@antv/g6-core": "^0.8.4",
+    "@types/uuid": "^9.0.0"
+  },
+  "dependencies": {
     "@antv/g6": "^4.8.3",
     "@euv/react": "workspace:*",
-    "@types/uuid": "^9.0.0",
     "uuid": "^9.0.0"
   }
 }

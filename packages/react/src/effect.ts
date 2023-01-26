@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid'
+
 const activeStack: Effect[] = []
 
 export function getActiveEffect(): Effect | undefined {
@@ -5,7 +7,13 @@ export function getActiveEffect(): Effect | undefined {
 }
 
 export class Effect<T = any> {
-  constructor(public fn: () => T) {}
+  id: string
+  name: string
+
+  constructor(public fn: () => T) {
+    this.id = uuidv4()
+    this.name = fn.name
+  }
 
   run() {
     activeStack.push(this)
@@ -24,8 +32,12 @@ interface Runner<T = any> {
   (): T
 }
 
+export const pack: Set<Effect> = new Set()
+
 export function effect<T = any>(fn: () => T): Runner<T> {
   const _effect = new Effect(fn)
+
+  pack.add(_effect)
 
   _effect.run()
 
