@@ -1,27 +1,17 @@
-import { effect, reactive } from '@euv/react'
+import { computed, reactive } from '@euv/react'
 
-const nums = reactive({ num1: 0, num2: 1, num3: 2 })
-const dummy: any = {}
+const value = reactive<{ foo?: number }>({})
 
-function childUpdate() {
-  return (dummy.num1 = nums.num1)
+function spy() {
+  return value.foo
 }
 
-const childEffect = effect(childUpdate)
+const cValue = computed(spy)
 
-function parentUpdate() {
-  dummy.num2 = nums.num2
-  childEffect()
-  dummy.num3 = nums.num3
-}
+// expect(cValue.value).toBe(undefined)
+console.log(cValue.value)
 
-effect(parentUpdate)
+value.foo = 1
 
-// this should only call the childEffect
-nums.num1 = 4
-
-// this calls the parentEffect, which calls the childEffect once
-nums.num2 = 10
-
-// this calls the parentEffect, which calls the childEffect once
-nums.num3 = 7
+// expect(cValue.value).toBe(1)
+console.log(cValue.value)
