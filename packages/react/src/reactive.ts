@@ -54,7 +54,11 @@ function trigger(target: Target, key: Key): void {
 
   for (const effect of effects) {
     if (effect !== activeEffect) {
-      effect.run()
+      if (effect.scheduler) {
+        effect.scheduler()
+      } else {
+        effect.run()
+      }
     }
   }
 }

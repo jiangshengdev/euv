@@ -130,12 +130,16 @@ function addTargets() {
 function addEffect(effect: Effect) {
   const label = `🧪${effect.name}`
   const parentId = effect.parentId
-  const effectNode = {
+  const effectNode: NodeConfig = {
     id: effect.id,
     label: label,
     style: {
       stroke: '#44D7B6'
     }
+  }
+
+  if (effect.scheduler) {
+    effectNode.style!.lineDash = [5, 5]
   }
 
   nodes.push(effectNode)
