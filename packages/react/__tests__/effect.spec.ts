@@ -40,6 +40,16 @@ describe('react/effect', () => {
     expect(dummy2).toBe(1)
   })
 
+  it('should observe nested properties', () => {
+    let dummy
+    const counter = reactive({ nested: { num: 0 } })
+    effect(() => (dummy = counter.nested.num))
+
+    expect(dummy).toBe(0)
+    counter.nested.num = 8
+    expect(dummy).toBe(8)
+  })
+
   it('should avoid implicit infinite recursive loops with itself', () => {
     const counter = reactive({ num: 0 })
 

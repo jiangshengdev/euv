@@ -1,4 +1,5 @@
 import { Effect, getActiveEffect } from './effect'
+import { isObject } from '@euv/shared'
 
 export type Key = string | symbol
 
@@ -68,6 +69,10 @@ export function reactive<T extends Target>(target: T): T {
       const result = Reflect.get(target, key, receiver)
 
       track(target, key)
+
+      if (isObject(result)) {
+        return reactive(result)
+      }
 
       return result
     },
