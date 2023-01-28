@@ -9,3 +9,4 @@ export {
   Target
 } from './reactive'
 export { effect, Effect, pack } from './effect'
+export { calculator, computed, Computed } from './computed'

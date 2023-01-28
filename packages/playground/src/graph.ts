@@ -1,7 +1,17 @@
 import G6 from '@antv/g6'
-import { Bucket, Effect, Key, pack, store, Target } from '@euv/react'
+import {
+  Bucket,
+  calculator,
+  Computed,
+  Effect,
+  Key,
+  pack,
+  store,
+  Target
+} from '@euv/react'
 import { EdgeConfig, NodeConfig, TreeGraphData } from '@antv/g6-core/es/types'
 import { v4 as uuidv4 } from 'uuid'
+import { attachKey, labelKey, parentKey, uuidKey } from '@euv/shared'
 
 /**
  * format the string
@@ -62,10 +72,36 @@ function addEffects(key: Key, bucket: Bucket, keyNode: NodeConfig) {
 
   if (effects) {
     for (const effect of effects) {
-      edges.push({
-        source: keyNode.id,
-        target: effect.id
-      })
+      if (!effect.scheduler) {
+        edges.push({
+          source: keyNode.id,
+          target: effect[uuidKey],
+          label: 'track/trigger'
+        })
+      } else {
+        edges.push({
+          source: keyNode.id,
+          target: effect[uuidKey],
+          label: 'track',
+          color: '#F7B500',
+          style: {
+            endArrow: {
+              fill: '#F7B500'
+            }
+          }
+        })
+        edges.push({
+          source: keyNode.id,
+          target: effect.scheduler[uuidKey],
+          label: 'trigger',
+          color: '#44D7B6',
+          style: {
+            endArrow: {
+              fill: '#44D7B6'
+            }
+          }
+        })
+      }
     }
   }
 }
@@ -128,14 +164,17 @@ function addTargets() {
 }
 
 function addEffect(effect: Effect) {
-  const label = `🧪${effect.name}`
-  const parentId = effect.parentId
-  const effectNode = {
-    id: effect.id,
-    label: label,
+  const parentId: string | undefined = effect[parentKey]?.[uuidKey]
+  const effectNode: NodeConfig = {
+    id: effect[uuidKey],
+    label: `🧪${effect[labelKey]}`,
     style: {
       stroke: '#44D7B6'
     }
+  }
+
+  if (effect.scheduler) {
+    effectNode.style!.lineDash = [5, 5]
   }
 
   nodes.push(effectNode)
@@ -143,7 +182,8 @@ function addEffect(effect: Effect) {
   if (parentId) {
     edges.push({
       source: parentId,
-      target: effectNode.id
+      target: effectNode.id,
+      label: 'wrap'
     })
   }
 }
@@ -154,9 +194,101 @@ function addPack() {
   }
 }
 
+function addDep(
+  computed: Computed<any>,
+  dep: Set<Effect>,
+  schedulerNode: NodeConfig
+) {
+  const valueNode: NodeConfig = {
+    id: uuidv4(),
+    label: '🔑get value',
+    style: {
+      stroke: '#F7B500'
+    }
+  }
+
+  nodes.push(valueNode)
+  edges.push({
+    source: computed[uuidKey],
+    target: valueNode.id
+  })
+  edges.push({
+    source: valueNode.id,
+    target: computed.effect[uuidKey],
+    label: 'run'
+  })
+
+  for (const effect of dep) {
+    edges.push({
+      source: valueNode.id,
+      target: effect[uuidKey],
+      label: 'track',
+      color: '#F7B500',
+      style: {
+        endArrow: {
+          fill: '#F7B500'
+        }
+      }
+    })
+    edges.push({
+      source: schedulerNode.id,
+      target: effect[uuidKey],
+      label: 'trigger',
+      color: '#44D7B6',
+      style: {
+        endArrow: {
+          fill: '#44D7B6'
+        }
+      }
+    })
+  }
+}
+
+function addComputed(computed: Computed<any>) {
+  const computedNode: NodeConfig = {
+    id: computed[uuidKey],
+    label: `🧮${computed[labelKey]}`,
+    style: {
+      stroke: '#FA6400'
+    }
+  }
+  const schedulerNode: NodeConfig = {
+    id: computed[attachKey][uuidKey] ?? uuidv4(),
+    label: `🏗️scheduler`,
+    style: {
+      stroke: '#6D7278'
+    }
+  }
+
+  nodes.push(schedulerNode)
+  nodes.push(computedNode)
+
+  if (computed.dep) {
+    addDep(computed, computed.dep, schedulerNode)
+  }
+
+  edges.push({
+    source: computedNode.id,
+    target: computed.effect[uuidKey],
+    label: '.effect'
+  })
+  edges.push({
+    source: computed.effect[uuidKey],
+    target: schedulerNode.id,
+    label: 'scheduler'
+  })
+}
+
+function addCalculator() {
+  for (const computed of calculator) {
+    addComputed(computed)
+  }
+}
+
 function init() {
   addTargets()
   addPack()
+  addCalculator()
 }
 
 init()
@@ -196,10 +328,17 @@ const graph = new G6.Graph({
     color: '#e2e2e2',
     style: {
       endArrow: {
-        path: 'M 0,0 L 8,4 L 8,-4 Z',
+        path: 'M 0,0 L 8,1 L 8,-1 Z',
         fill: '#e2e2e2'
       },
       radius: 20
+    },
+    labelCfg: {
+      refY: 6,
+      autoRotate: true,
+      style: {
+        fontSize: 8
+      }
     }
   }
 })

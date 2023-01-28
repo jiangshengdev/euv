@@ -1,4 +1,5 @@
 import { Effect, getActiveEffect } from './effect'
+import { isObject } from '@euv/shared'
 
 export type Key = string | symbol
 
@@ -34,11 +35,18 @@ function track(target: Target, key: Key): void {
     bucket.set(key, effects)
   }
 
-  effects.add(activeEffect)
+  trackEffects(effects)
+}
+
+export function trackEffects(effects: Set<Effect>) {
+  const activeEffect = getActiveEffect()
+
+  if (activeEffect) {
+    effects.add(activeEffect)
+  }
 }
 
 function trigger(target: Target, key: Key): void {
-  const activeEffect = getActiveEffect()
   const bucket: Bucket | undefined = store.get(target)
 
   if (!bucket) {
@@ -51,9 +59,19 @@ function trigger(target: Target, key: Key): void {
     return
   }
 
+  triggerEffects(effects)
+}
+
+export function triggerEffects(effects: Set<Effect>) {
+  const activeEffect = getActiveEffect()
+
   for (const effect of effects) {
     if (effect !== activeEffect) {
-      effect.run()
+      if (effect.scheduler) {
+        effect.scheduler()
+      } else {
+        effect.run()
+      }
     }
   }
 }
@@ -68,6 +86,10 @@ export function reactive<T extends Target>(target: T): T {
       const result = Reflect.get(target, key, receiver)
 
       track(target, key)
+
+      if (isObject(result)) {
+        return reactive(result)
+      }
 
       return result
     },
