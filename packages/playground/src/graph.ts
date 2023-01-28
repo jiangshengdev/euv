@@ -220,7 +220,7 @@ function addDep(
 
   for (const effect of dep) {
     edges.push({
-      source: valueNode.id,
+      source: computed[uuidKey],
       target: effect[uuidKey],
       label: 'track',
       color: '#F7B500',
@@ -275,7 +275,7 @@ function addComputed(computed: Computed<any>) {
   edges.push({
     source: computed.effect[uuidKey],
     target: schedulerNode.id,
-    label: 'scheduler'
+    label: '.scheduler'
   })
 }
 
