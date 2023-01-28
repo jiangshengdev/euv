@@ -1,5 +1,7 @@
-import { isFunction, NOOP } from '@euv/shared'
+import { v4 as uuidv4 } from 'uuid'
+import { getFnContent, isFunction, NOOP } from '@euv/shared'
 import { Effect } from './effect'
+import { trackEffects, triggerEffects } from './reactive'
 
 type ComputedGetter<T> = (...args: any[]) => T
 type ComputedSetter<T> = (v: T) => void
@@ -9,22 +11,40 @@ interface ComputedOptions<T> {
   set: ComputedSetter<T>
 }
 
-class Computed<T> {
+export const calculator: Set<Computed<any>> = new Set()
+
+export class Computed<T> {
   public effect: Effect<T>
   public _dirty = true
+  public dep?: Set<Effect>
+  id: string
+  content: string
 
   constructor(getter: ComputedGetter<T>, private _setter: ComputedSetter<T>) {
     const effect = new Effect(getter, () => {
       if (!this._dirty) {
         this._dirty = true
+
+        if (this.dep) {
+          triggerEffects(this.dep)
+        }
       }
     })
 
     this.effect = effect
+    this.id = uuidv4()
+    this.content = getFnContent(getter)
+    calculator.add(this)
   }
 
   private _value!: T
   get value() {
+    if (!this.dep) {
+      this.dep = new Set()
+    }
+
+    trackEffects(this.dep)
+
     if (this._dirty) {
       this._dirty = false
 

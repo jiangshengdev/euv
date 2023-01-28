@@ -1,5 +1,14 @@
 import G6 from '@antv/g6'
-import { Bucket, Effect, Key, pack, store, Target } from '@euv/react'
+import {
+  Bucket,
+  calculator,
+  Computed,
+  Effect,
+  Key,
+  pack,
+  store,
+  Target
+} from '@euv/react'
 import { EdgeConfig, NodeConfig, TreeGraphData } from '@antv/g6-core/es/types'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -158,9 +167,25 @@ function addPack() {
   }
 }
 
+function addComputed(computed: Computed<any>) {
+  const computedNode: NodeConfig = {
+    id: computed.id,
+    label: `🧮${computed.content}`
+  }
+
+  nodes.push(computedNode)
+}
+
+function addCalculator() {
+  for (const computed of calculator) {
+    addComputed(computed)
+  }
+}
+
 function init() {
   addTargets()
   addPack()
+  addCalculator()
 }
 
 init()

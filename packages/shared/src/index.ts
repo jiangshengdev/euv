@@ -29,3 +29,9 @@ export const toRawType = (value: unknown): string => {
 // compare whether a value has changed, accounting for NaN.
 export const hasChanged = (value: any, oldValue: any): boolean =>
   !Object.is(value, oldValue)
+
+export function getFnContent(fn: Function) {
+  const content = fn.toString().replace(/.*?\{(.*)}.*?/ms, '$1')
+
+  return content.trim()
+}

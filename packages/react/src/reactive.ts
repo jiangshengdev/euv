@@ -35,11 +35,18 @@ function track(target: Target, key: Key): void {
     bucket.set(key, effects)
   }
 
-  effects.add(activeEffect)
+  trackEffects(effects)
+}
+
+export function trackEffects(effects: Set<Effect>) {
+  const activeEffect = getActiveEffect()
+
+  if (activeEffect) {
+    effects.add(activeEffect)
+  }
 }
 
 function trigger(target: Target, key: Key): void {
-  const activeEffect = getActiveEffect()
   const bucket: Bucket | undefined = store.get(target)
 
   if (!bucket) {
@@ -51,6 +58,12 @@ function trigger(target: Target, key: Key): void {
   if (!effects) {
     return
   }
+
+  triggerEffects(effects)
+}
+
+export function triggerEffects(effects: Set<Effect>) {
+  const activeEffect = getActiveEffect()
 
   for (const effect of effects) {
     if (effect !== activeEffect) {
