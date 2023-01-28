@@ -152,7 +152,7 @@ function addTargets() {
 }
 
 function addEffect(effect: Effect) {
-  const parentId: string = effect[parentKey]?.[uuidKey] ?? uuidv4()
+  const parentId: string | undefined = effect[parentKey]?.[uuidKey]
   const effectNode: NodeConfig = {
     id: effect[uuidKey],
     label: `🧪${effect[labelKey]}`,
@@ -199,6 +199,11 @@ function addDep(
   edges.push({
     source: computed[uuidKey],
     target: valueNode.id
+  })
+  edges.push({
+    source: valueNode.id,
+    target: computed.effect[uuidKey],
+    label: 'run'
   })
 
   for (const effect of dep) {
@@ -298,12 +303,14 @@ const graph = new G6.Graph({
     color: '#e2e2e2',
     style: {
       endArrow: {
-        path: 'M 0,0 L 8,4 L 8,-4 Z',
+        path: 'M 0,0 L 8,1 L 8,-1 Z',
         fill: '#e2e2e2'
       },
       radius: 20
     },
     labelCfg: {
+      refY: 6,
+      autoRotate: true,
       style: {
         fontSize: 8
       }
