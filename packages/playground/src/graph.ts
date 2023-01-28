@@ -82,12 +82,24 @@ function addEffects(key: Key, bucket: Bucket, keyNode: NodeConfig) {
         edges.push({
           source: keyNode.id,
           target: effect[uuidKey],
-          label: 'track'
+          label: 'track',
+          color: '#F7B500',
+          style: {
+            endArrow: {
+              fill: '#F7B500'
+            }
+          }
         })
         edges.push({
           source: keyNode.id,
           target: effect.scheduler[uuidKey],
-          label: 'trigger'
+          label: 'trigger',
+          color: '#44D7B6',
+          style: {
+            endArrow: {
+              fill: '#44D7B6'
+            }
+          }
         })
       }
     }
@@ -210,12 +222,24 @@ function addDep(
     edges.push({
       source: valueNode.id,
       target: effect[uuidKey],
-      label: 'track'
+      label: 'track',
+      color: '#F7B500',
+      style: {
+        endArrow: {
+          fill: '#F7B500'
+        }
+      }
     })
     edges.push({
       source: schedulerNode.id,
       target: effect[uuidKey],
-      label: 'trigger'
+      label: 'trigger',
+      color: '#44D7B6',
+      style: {
+        endArrow: {
+          fill: '#44D7B6'
+        }
+      }
     })
   }
 }
@@ -250,7 +274,8 @@ function addComputed(computed: Computed<any>) {
   })
   edges.push({
     source: computed.effect[uuidKey],
-    target: schedulerNode.id
+    target: schedulerNode.id,
+    label: 'scheduler'
   })
 }
 
