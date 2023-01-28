@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "internal utils shared across @euv packages",
   "main": "index.js",
+  "module": "dist/shared.esm-bundler.js",
   "sideEffects": false,
   "buildOptions": {
     "formats": [

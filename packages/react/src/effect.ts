@@ -1,9 +1,15 @@
 import { v4 as uuidv4 } from 'uuid'
-import { extend } from '@euv/shared'
+import { extend, labelKey, parentKey, uuidKey } from '@euv/shared'
+import { Computed } from './computed'
 
-type Scheduler = (...args: any[]) => any
+export interface Scheduler {
+  [uuidKey]?: string
+  [parentKey]?: Computed<any>
 
-const effectStack: Effect[] = []
+  (...args: any[]): any
+}
+
+export const effectStack: Effect[] = []
 
 export function getActiveEffect(): Effect | undefined {
   return effectStack.at(-1)
@@ -12,18 +18,18 @@ export function getActiveEffect(): Effect | undefined {
 export const pack: Set<Effect> = new Set()
 
 export class Effect<T = any> {
-  id: string
-  name: string
-  parentId?: string
+  public [uuidKey]: string
+  public [labelKey]: string
+  public [parentKey]?: Effect
 
   constructor(public fn: () => T, public scheduler: Scheduler | null = null) {
-    this.id = uuidv4()
-    this.name = fn.name
+    this[uuidKey] = uuidv4()
+    this[labelKey] = fn.name || scheduler ? 'getter' : 'effect'
     pack.add(this)
   }
 
   run() {
-    this.parentId = getActiveEffect()?.id
+    this[parentKey] = getActiveEffect()
     effectStack.push(this)
 
     const result = this.fn()

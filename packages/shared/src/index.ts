@@ -2,6 +2,11 @@ export * from './looseEqual'
 
 export const NOOP = () => {}
 
+export const attachKey = Symbol()
+export const labelKey = Symbol()
+export const parentKey = Symbol()
+export const uuidKey = Symbol()
+
 export const extend = Object.assign
 
 export const isArray = Array.isArray

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "@euv/react",
   "main": "index.js",
-  "module": "dist/react.esm.js",
+  "module": "dist/react.esm-bundler.js",
   "sideEffects": false,
   "buildOptions": {
     "name": "EuvReact",

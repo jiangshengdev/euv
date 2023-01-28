@@ -1,19 +1,12 @@
 import { computed, effect, reactive } from '@euv/react'
 
 const value = reactive<{ foo?: number }>({})
-
-function getter() {
-  return value.foo
-}
-
-const cValue = computed(getter)
+const cValue = computed(() => value.foo)
 let dummy
 
-function spy() {
+effect(() => {
   dummy = cValue.value
-}
-
-effect(spy)
+})
 
 // expect(dummy).toBe(undefined)
 console.log(dummy)

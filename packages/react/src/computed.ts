@@ -1,6 +1,14 @@
 import { v4 as uuidv4 } from 'uuid'
-import { getFnContent, isFunction, NOOP } from '@euv/shared'
-import { Effect } from './effect'
+import {
+  attachKey,
+  getFnContent,
+  isFunction,
+  labelKey,
+  NOOP,
+  parentKey,
+  uuidKey
+} from '@euv/shared'
+import { Effect, Scheduler } from './effect'
 import { trackEffects, triggerEffects } from './reactive'
 
 type ComputedGetter<T> = (...args: any[]) => T
@@ -17,11 +25,12 @@ export class Computed<T> {
   public effect: Effect<T>
   public _dirty = true
   public dep?: Set<Effect>
-  id: string
-  content: string
+  public [uuidKey]: string
+  public [labelKey]: string
+  public [attachKey]: Scheduler
 
   constructor(getter: ComputedGetter<T>, private _setter: ComputedSetter<T>) {
-    const effect = new Effect(getter, () => {
+    const scheduler: Scheduler = () => {
       if (!this._dirty) {
         this._dirty = true
 
@@ -29,11 +38,17 @@ export class Computed<T> {
           triggerEffects(this.dep)
         }
       }
-    })
+    }
+
+    scheduler[uuidKey] = uuidv4()
+    scheduler[parentKey] = this
+
+    const effect = new Effect(getter, scheduler)
 
     this.effect = effect
-    this.id = uuidv4()
-    this.content = getFnContent(getter)
+    this[attachKey] = scheduler
+    this[uuidKey] = uuidv4()
+    this[labelKey] = getFnContent(getter)
     calculator.add(this)
   }
 
@@ -60,6 +75,9 @@ export class Computed<T> {
     this._setter(newValue)
   }
 }
+
+export function computed<T>(getter: ComputedGetter<T>): Computed<T>
+export function computed<T>(options: ComputedOptions<T>): Computed<T>
 
 export function computed<T>(
   getterOrOptions: ComputedGetter<T> | ComputedOptions<T>

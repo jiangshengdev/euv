@@ -11,6 +11,7 @@ import {
 } from '@euv/react'
 import { EdgeConfig, NodeConfig, TreeGraphData } from '@antv/g6-core/es/types'
 import { v4 as uuidv4 } from 'uuid'
+import { attachKey, labelKey, parentKey, uuidKey } from '@euv/shared'
 
 /**
  * format the string
@@ -71,10 +72,24 @@ function addEffects(key: Key, bucket: Bucket, keyNode: NodeConfig) {
 
   if (effects) {
     for (const effect of effects) {
-      edges.push({
-        source: keyNode.id,
-        target: effect.id
-      })
+      if (!effect.scheduler) {
+        edges.push({
+          source: keyNode.id,
+          target: effect[uuidKey],
+          label: 'track/trigger'
+        })
+      } else {
+        edges.push({
+          source: keyNode.id,
+          target: effect[uuidKey],
+          label: 'track'
+        })
+        edges.push({
+          source: keyNode.id,
+          target: effect.scheduler[uuidKey],
+          label: 'trigger'
+        })
+      }
     }
   }
 }
@@ -137,11 +152,10 @@ function addTargets() {
 }
 
 function addEffect(effect: Effect) {
-  const label = `🧪${effect.name}`
-  const parentId = effect.parentId
+  const parentId: string = effect[parentKey]?.[uuidKey] ?? uuidv4()
   const effectNode: NodeConfig = {
-    id: effect.id,
-    label: label,
+    id: effect[uuidKey],
+    label: `🧪${effect[labelKey]}`,
     style: {
       stroke: '#44D7B6'
     }
@@ -156,7 +170,8 @@ function addEffect(effect: Effect) {
   if (parentId) {
     edges.push({
       source: parentId,
-      target: effectNode.id
+      target: effectNode.id,
+      label: 'wrap'
     })
   }
 }
@@ -167,13 +182,71 @@ function addPack() {
   }
 }
 
-function addComputed(computed: Computed<any>) {
-  const computedNode: NodeConfig = {
-    id: computed.id,
-    label: `🧮${computed.content}`
+function addDep(
+  computed: Computed<any>,
+  dep: Set<Effect>,
+  schedulerNode: NodeConfig
+) {
+  const valueNode: NodeConfig = {
+    id: uuidv4(),
+    label: '🔑get value',
+    style: {
+      stroke: '#F7B500'
+    }
   }
 
+  nodes.push(valueNode)
+  edges.push({
+    source: computed[uuidKey],
+    target: valueNode.id
+  })
+
+  for (const effect of dep) {
+    edges.push({
+      source: valueNode.id,
+      target: effect[uuidKey],
+      label: 'track'
+    })
+    edges.push({
+      source: schedulerNode.id,
+      target: effect[uuidKey],
+      label: 'trigger'
+    })
+  }
+}
+
+function addComputed(computed: Computed<any>) {
+  const computedNode: NodeConfig = {
+    id: computed[uuidKey],
+    label: `🧮${computed[labelKey]}`,
+    style: {
+      stroke: '#FA6400'
+    }
+  }
+  const schedulerNode: NodeConfig = {
+    id: computed[attachKey][uuidKey] ?? uuidv4(),
+    label: `🏗️scheduler`,
+    style: {
+      stroke: '#6D7278'
+    }
+  }
+
+  nodes.push(schedulerNode)
   nodes.push(computedNode)
+
+  if (computed.dep) {
+    addDep(computed, computed.dep, schedulerNode)
+  }
+
+  edges.push({
+    source: computedNode.id,
+    target: computed.effect[uuidKey],
+    label: '.effect'
+  })
+  edges.push({
+    source: computed.effect[uuidKey],
+    target: schedulerNode.id
+  })
 }
 
 function addCalculator() {
@@ -229,6 +302,11 @@ const graph = new G6.Graph({
         fill: '#e2e2e2'
       },
       radius: 20
+    },
+    labelCfg: {
+      style: {
+        fontSize: 8
+      }
     }
   }
 })
